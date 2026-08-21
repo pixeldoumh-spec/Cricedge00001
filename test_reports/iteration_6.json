@@ -1,0 +1,20 @@
+{
+  "summary": "Completed targeted Cricsheet history API and dashboard regression testing. Persisted dataset reports 1,243 matches and 1,218 tracked outcomes; normalized list responses omit _id and innings; real metrics, attribution, chart/table, safe source link, mobile layout, and live fixture explorer all passed.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "CLI cricsheet_ingest.ingest / cricsheet_ingestion_runs", "issue": "Each import uses a new timestamp run_id and replace_one on that unique ID, so repeated imports add metadata documents indefinitely even though match documents are idempotently upserted."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/test_cricedge_api.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": ["Consider making ingestion-run metadata idempotent by keying on archive SHA/version (or explicitly retaining bounded run history) and add a repeated-import regression test."],
+  "critical_code_review_comments": ["The match collection is safely upserted by deterministic cricsheet match_id, but ingestion run metadata is keyed by timestamp and will grow on every repeated import."],
+  "updated_files": ["/app/test_reports/iteration_6.json"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "None; used the existing persisted Cricsheet dataset and live fixture feed.",
+  "retest_needed": true,
+  "should_call_test_agent_after_fix": true,
+  "context_for_next_testing_agent": "History API and dashboard verified on public URL at desktop/mobile. Re-test ingestion twice and compare cricsheet_ingestion_runs count; no ingestion was executed during this iteration to avoid downloading/replacing the production preview dataset.",
+  "rca of the issue": "normalize_match creates deterministic cricsheet:<source id> match IDs and replace_one(upsert=True) prevents duplicate match growth. ingest instead creates run_id=datetime.now(...).isoformat() and replaces by that unique value, guaranteeing a new metadata row per invocation."
+}
