@@ -19,62 +19,54 @@ db = mongo[os.environ["DB_NAME"]]
 
 # ---------- Format strategy registry ----------
 # Baseline priors derived from historic Cricsheet averages per format.
+# Each format defines a canonical event catalogue that the prediction endpoint materializes.
 FORMAT_STRATEGY = {
     "T20": {
-        "run_line": "Over 168.5 team runs",
-        "batter_line": "30+ runs",
-        "total_prob": 61,
-        "player_prob": 54,
-        "match_drivers": ["Powerplay strike rate", "Death-overs economy", "Recent form (last 5)"],
-        "total_drivers": ["Batting tempo", "Boundary %", "Surface pace profile"],
-        "player_drivers": ["Strike rotation", "Match-up vs opening bowler"],
         "profile": "20 overs · high variance · powerplay decisive",
-        "extra_market": None,
+        "match_drivers": ["Powerplay strike rate", "Death-overs economy", "Recent form (last 5)"],
+        "events": [
+            {"market": "Team runs", "template": "Over 168.5 team runs", "probability": 61, "confidence": "Medium", "drivers": ["Batting tempo", "Boundary %", "Surface pace profile"]},
+            {"market": "Top batter", "template": "{player} 30+ runs", "probability": 54, "confidence": "Medium", "drivers": ["Strike rotation", "Match-up vs opening bowler"]},
+            {"market": "Powerplay runs", "template": "Over 51.5 in overs 1-6", "probability": 57, "confidence": "Medium", "drivers": ["Opener boundary %", "Field restrictions edge"]},
+            {"market": "Top bowler wickets", "template": "Lead bowler 2+ wickets", "probability": 48, "confidence": "Medium", "drivers": ["New-ball threat", "Middle-overs breakthroughs"]},
+            {"market": "Total sixes", "template": "Over 11.5 sixes in match", "probability": 52, "confidence": "Medium", "drivers": ["Boundary size", "Batter power index"]},
+            {"market": "Highest individual score", "template": "Any batter 50+", "probability": 64, "confidence": "High", "drivers": ["Anchor role stability", "Death-hitter presence"]},
+        ],
     },
     "Hundred": {
-        "run_line": "Over 148.5 team runs",
-        "batter_line": "25+ runs",
-        "total_prob": 59,
-        "player_prob": 52,
-        "match_drivers": ["100-ball tempo", "5-ball set match-ups", "Recent form"],
-        "total_drivers": ["Powerplay wickets lost", "Spinner deployment", "Ground size"],
-        "player_drivers": ["Strike rotation", "Set-to-set match-up"],
         "profile": "100 balls · condensed powerplay · spinner leverage",
-        "extra_market": None,
+        "match_drivers": ["100-ball tempo", "5-ball set match-ups", "Recent form"],
+        "events": [
+            {"market": "Team runs", "template": "Over 148.5 team runs", "probability": 59, "confidence": "Medium", "drivers": ["Powerplay wickets lost", "Spinner deployment", "Ground size"]},
+            {"market": "Top batter", "template": "{player} 25+ runs", "probability": 52, "confidence": "Medium", "drivers": ["Strike rotation", "Set-to-set match-up"]},
+            {"market": "Powerplay runs", "template": "Over 32.5 in first 25 balls", "probability": 55, "confidence": "Medium", "drivers": ["Opener risk profile", "Field restriction phase"]},
+            {"market": "Top bowler wickets", "template": "Lead bowler 2+ wickets", "probability": 46, "confidence": "Medium", "drivers": ["10-ball set impact", "Spinner match-up edge"]},
+            {"market": "Total fours", "template": "Over 22.5 fours in match", "probability": 58, "confidence": "Medium", "drivers": ["Boundary distances", "Batter placement"]},
+        ],
     },
     "ODI": {
-        "run_line": "Over 276.5 team runs",
-        "batter_line": "50+ runs",
-        "total_prob": 58,
-        "player_prob": 47,
-        "match_drivers": ["Batting depth", "Middle-overs run rate", "Spin control 11-40"],
-        "total_drivers": ["Dew factor", "Boundary rate", "Death bowling economy"],
-        "player_drivers": ["Anchor role", "Match-up vs spin"],
         "profile": "50 overs · batting depth · phase-based tempo",
-        "extra_market": {
-            "market": "Team score band",
-            "selection": "First innings 250-310",
-            "probability": 46,
-            "confidence": "Medium",
-            "drivers": ["Historic venue par", "Toss decision", "Overhead conditions"],
-        },
+        "match_drivers": ["Batting depth", "Middle-overs run rate", "Spin control 11-40"],
+        "events": [
+            {"market": "Team runs", "template": "Over 276.5 team runs", "probability": 58, "confidence": "Medium", "drivers": ["Dew factor", "Boundary rate", "Death bowling economy"]},
+            {"market": "Top batter", "template": "{player} 50+ runs", "probability": 47, "confidence": "Medium", "drivers": ["Anchor role", "Match-up vs spin"]},
+            {"market": "Team score band", "template": "First innings 250-310", "probability": 46, "confidence": "Medium", "drivers": ["Historic venue par", "Toss decision", "Overhead conditions"]},
+            {"market": "Century scored", "template": "Any batter 100+", "probability": 38, "confidence": "Medium", "drivers": ["Anchor conversion rate", "Death-overs freedom"]},
+            {"market": "Top bowler wickets", "template": "Lead bowler 3+ wickets", "probability": 41, "confidence": "Medium", "drivers": ["Powerplay wickets", "Death-overs strikes"]},
+            {"market": "Opening partnership", "template": "Over 42.5 for 1st wicket", "probability": 50, "confidence": "Medium", "drivers": ["Opener stability", "New-ball threat rating"]},
+        ],
     },
     "Test": {
-        "run_line": "Over 340.5 first-innings runs",
-        "batter_line": "60+ runs",
-        "total_prob": 54,
-        "player_prob": 45,
-        "match_drivers": ["Session momentum", "Seam movement", "Recent series form"],
-        "total_drivers": ["Surface deterioration", "Collapse risk", "Session-by-session runs"],
-        "player_drivers": ["New-ball survival", "Match-up vs seam/spin"],
         "profile": "5 days · session-based · draw is a valid outcome",
-        "extra_market": {
-            "market": "Match outcome",
-            "selection": "Draw not ruled out",
-            "probability": 22,
-            "confidence": "Contextual",
-            "drivers": ["Historic venue draw rate", "Weather forecast", "Over-rate"],
-        },
+        "match_drivers": ["Session momentum", "Seam movement", "Recent series form"],
+        "events": [
+            {"market": "First-innings runs", "template": "Over 340.5 first-innings runs", "probability": 54, "confidence": "Medium", "drivers": ["Surface deterioration", "Collapse risk", "Session-by-session runs"]},
+            {"market": "Top batter", "template": "{player} 60+ runs", "probability": 45, "confidence": "Medium", "drivers": ["New-ball survival", "Match-up vs seam/spin"]},
+            {"market": "Match outcome", "template": "Draw not ruled out", "probability": 22, "confidence": "Contextual", "drivers": ["Historic venue draw rate", "Weather forecast", "Over-rate"]},
+            {"market": "Top wicket-taker", "template": "Lead bowler 5+ wickets", "probability": 34, "confidence": "Medium", "drivers": ["Seam movement forecast", "Surface abrasion"]},
+            {"market": "Match duration", "template": "Match reaches day 5", "probability": 48, "confidence": "Contextual", "drivers": ["Weather forecast", "Batting depth", "Over-rate"]},
+            {"market": "Session leader", "template": "First-session runs > wickets × 25", "probability": 55, "confidence": "Medium", "drivers": ["New-ball threat", "Opening batter form"]},
+        ],
     },
 }
 DEFAULT_STRATEGY = FORMAT_STRATEGY["T20"]
@@ -138,17 +130,25 @@ sample_fixtures = [
 ]
 
 def normalize_live_event(raw: dict) -> Fixture:
-    outcomes = []
+    # Aggregate prices per outcome across bookmakers, then take median for a cleaner card.
+    prices: dict[str, list[float]] = {}
     for bookmaker in raw.get("bookmakers", []):
         for market in bookmaker.get("markets", []):
             if market.get("key") != "h2h":
                 continue
             for outcome in market.get("outcomes", []):
                 price = float(outcome.get("price", 0))
-                outcomes.append(Outcome(name=outcome["name"], price=price, probability=round(1 / price, 3) if price else 0, edge=0))
+                if price > 0:
+                    prices.setdefault(outcome["name"], []).append(price)
+    outcomes = []
+    for name, values in prices.items():
+        values.sort()
+        median = values[len(values) // 2]
+        outcomes.append(Outcome(name=name, price=round(median, 2), probability=round(1 / median, 3), edge=0))
+    outcomes.sort(key=lambda o: o.price)
     teams = [raw.get("home_team", "Home team"), raw.get("away_team", "Away team")]
     fmt, competition = resolve_format(raw.get("sport_key", ""), raw.get("sport_title", "Cricket"))
-    confidence = min(86, max(52, 58 + len(outcomes) * 2))
+    confidence = min(86, max(52, 58 + len(prices) * 4))
     return Fixture(id=raw["id"], competition=competition, format=fmt, venue="Venue pending", start_time=raw["commence_time"], teams=teams, status="UPCOMING", model_tag="LIVE FEED", confidence=confidence, odds=outcomes, sample=False)
 
 async def fetch_live_fixtures() -> list[Fixture]:
@@ -226,55 +226,60 @@ async def get_predictions(fixture_id: str):
     first, second = fixture.teams[0], fixture.teams[1]
     strategy = FORMAT_STRATEGY.get(fixture.format, DEFAULT_STRATEGY)
 
-    # Player anchor by fixture, otherwise team-agnostic top batter label
     player_by_fixture = {"f-001": "Suryakumar Yadav", "f-002": "Liam Dawson", "f-003": "Jos Buttler", "f-004": "Steve Smith"}
     player = player_by_fixture.get(fixture.id, f"{first} top batter")
 
     win_probability = round(fixture.odds[0].probability * 100) if fixture.odds else 50
-    total_probability = strategy["total_prob"]
-    player_probability = strategy["player_prob"]
-    batter_selection = f"{player} {strategy['batter_line']}"
+    win_event = {
+        "market": "Match result",
+        "selection": f"{fixture.odds[0].name if fixture.odds else first} win",
+        "probability": win_probability,
+        "confidence": "High" if fixture.confidence > 70 else "Medium",
+        "drivers": strategy["match_drivers"],
+    }
 
-    events = [
-        {
-            "market": "Match result",
-            "selection": f"{first} win",
-            "probability": win_probability,
-            "confidence": "High" if fixture.confidence > 70 else "Medium",
-            "drivers": strategy["match_drivers"],
-        },
-        {
-            "market": "Team runs",
-            "selection": strategy["run_line"],
-            "probability": total_probability,
-            "confidence": "Medium",
-            "drivers": strategy["total_drivers"],
-        },
-        {
-            "market": "Top batter",
-            "selection": batter_selection,
-            "probability": player_probability,
-            "confidence": "Medium",
-            "drivers": strategy["player_drivers"],
-        },
-    ]
-    if strategy.get("extra_market"):
-        events.append(strategy["extra_market"])
+    events = [win_event]
+    for spec in strategy["events"]:
+        events.append({
+            "market": spec["market"],
+            "selection": spec["template"].format(player=player, home=first, away=second),
+            "probability": spec["probability"],
+            "confidence": spec["confidence"],
+            "drivers": spec["drivers"],
+        })
 
-    same_game = [
-        {
+    # Same-game multis: pair the match winner with 2-3 highest-signal secondary markets.
+    secondary = sorted(events[1:], key=lambda e: e["probability"], reverse=True)
+    def joint(*probs: float) -> int:
+        result = 1.0
+        for p in probs:
+            result *= p / 100
+        return round(result * 100)
+
+    same_game = []
+    if len(secondary) >= 1:
+        same_game.append({
             "label": "Balanced builder",
-            "legs": [f"{first} win", strategy["run_line"]],
-            "probability": round(win_probability * total_probability / 100),
+            "legs": [win_event["selection"], secondary[0]["selection"]],
+            "probability": joint(win_probability, secondary[0]["probability"]),
             "confidence": "Balanced",
-        },
-        {
+        })
+    if len(secondary) >= 2:
+        same_game.append({
             "label": "High conviction",
-            "legs": [f"{first} win", batter_selection],
-            "probability": round(win_probability * player_probability / 100),
+            "legs": [win_event["selection"], secondary[0]["selection"], secondary[1]["selection"]],
+            "probability": joint(win_probability, secondary[0]["probability"], secondary[1]["probability"]),
             "confidence": "Selective",
-        },
-    ]
+        })
+    # A lower-probability, higher-payoff style multi from mid-tier events
+    if len(secondary) >= 3:
+        tail = secondary[-2:]
+        same_game.append({
+            "label": "Contrarian angle",
+            "legs": [tail[0]["selection"], tail[1]["selection"]],
+            "probability": joint(tail[0]["probability"], tail[1]["probability"]),
+            "confidence": "Speculative",
+        })
 
     return {
         "fixture": fixture,
