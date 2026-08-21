@@ -17,59 +17,83 @@ api = APIRouter(prefix="/api")
 mongo = MongoClient(os.environ["MONGO_URL"], serverSelectionTimeoutMS=3000)
 db = mongo[os.environ["DB_NAME"]]
 
-# ---------- Format strategy registry ----------
-# Baseline priors derived from historic Cricsheet averages per format.
-# Each format defines a canonical event catalogue that the prediction endpoint materializes.
-FORMAT_STRATEGY = {
-    "T20": {
-        "profile": "20 overs · high variance · powerplay decisive",
-        "match_drivers": ["Powerplay strike rate", "Death-overs economy", "Recent form (last 5)"],
-        "events": [
-            {"market": "Team runs", "template": "Over 168.5 team runs", "probability": 61, "confidence": "Medium", "drivers": ["Batting tempo", "Boundary %", "Surface pace profile"]},
-            {"market": "Top batter", "template": "{player} 30+ runs", "probability": 54, "confidence": "Medium", "drivers": ["Strike rotation", "Match-up vs opening bowler"]},
-            {"market": "Powerplay runs", "template": "Over 51.5 in overs 1-6", "probability": 57, "confidence": "Medium", "drivers": ["Opener boundary %", "Field restrictions edge"]},
-            {"market": "Top bowler wickets", "template": "Lead bowler 2+ wickets", "probability": 48, "confidence": "Medium", "drivers": ["New-ball threat", "Middle-overs breakthroughs"]},
-            {"market": "Total sixes", "template": "Over 11.5 sixes in match", "probability": 52, "confidence": "Medium", "drivers": ["Boundary size", "Batter power index"]},
-            {"market": "Highest individual score", "template": "Any batter 50+", "probability": 64, "confidence": "High", "drivers": ["Anchor role stability", "Death-hitter presence"]},
-        ],
-    },
-    "Hundred": {
-        "profile": "100 balls · condensed powerplay · spinner leverage",
-        "match_drivers": ["100-ball tempo", "5-ball set match-ups", "Recent form"],
-        "events": [
-            {"market": "Team runs", "template": "Over 148.5 team runs", "probability": 59, "confidence": "Medium", "drivers": ["Powerplay wickets lost", "Spinner deployment", "Ground size"]},
-            {"market": "Top batter", "template": "{player} 25+ runs", "probability": 52, "confidence": "Medium", "drivers": ["Strike rotation", "Set-to-set match-up"]},
-            {"market": "Powerplay runs", "template": "Over 32.5 in first 25 balls", "probability": 55, "confidence": "Medium", "drivers": ["Opener risk profile", "Field restriction phase"]},
-            {"market": "Top bowler wickets", "template": "Lead bowler 2+ wickets", "probability": 46, "confidence": "Medium", "drivers": ["10-ball set impact", "Spinner match-up edge"]},
-            {"market": "Total fours", "template": "Over 22.5 fours in match", "probability": 58, "confidence": "Medium", "drivers": ["Boundary distances", "Batter placement"]},
-        ],
-    },
-    "ODI": {
-        "profile": "50 overs · batting depth · phase-based tempo",
-        "match_drivers": ["Batting depth", "Middle-overs run rate", "Spin control 11-40"],
-        "events": [
-            {"market": "Team runs", "template": "Over 276.5 team runs", "probability": 58, "confidence": "Medium", "drivers": ["Dew factor", "Boundary rate", "Death bowling economy"]},
-            {"market": "Top batter", "template": "{player} 50+ runs", "probability": 47, "confidence": "Medium", "drivers": ["Anchor role", "Match-up vs spin"]},
-            {"market": "Team score band", "template": "First innings 250-310", "probability": 46, "confidence": "Medium", "drivers": ["Historic venue par", "Toss decision", "Overhead conditions"]},
-            {"market": "Century scored", "template": "Any batter 100+", "probability": 38, "confidence": "Medium", "drivers": ["Anchor conversion rate", "Death-overs freedom"]},
-            {"market": "Top bowler wickets", "template": "Lead bowler 3+ wickets", "probability": 41, "confidence": "Medium", "drivers": ["Powerplay wickets", "Death-overs strikes"]},
-            {"market": "Opening partnership", "template": "Over 42.5 for 1st wicket", "probability": 50, "confidence": "Medium", "drivers": ["Opener stability", "New-ball threat rating"]},
-        ],
-    },
-    "Test": {
-        "profile": "5 days · session-based · draw is a valid outcome",
-        "match_drivers": ["Session momentum", "Seam movement", "Recent series form"],
-        "events": [
-            {"market": "First-innings runs", "template": "Over 340.5 first-innings runs", "probability": 54, "confidence": "Medium", "drivers": ["Surface deterioration", "Collapse risk", "Session-by-session runs"]},
-            {"market": "Top batter", "template": "{player} 60+ runs", "probability": 45, "confidence": "Medium", "drivers": ["New-ball survival", "Match-up vs seam/spin"]},
-            {"market": "Match outcome", "template": "Draw not ruled out", "probability": 22, "confidence": "Contextual", "drivers": ["Historic venue draw rate", "Weather forecast", "Over-rate"]},
-            {"market": "Top wicket-taker", "template": "Lead bowler 5+ wickets", "probability": 34, "confidence": "Medium", "drivers": ["Seam movement forecast", "Surface abrasion"]},
-            {"market": "Match duration", "template": "Match reaches day 5", "probability": 48, "confidence": "Contextual", "drivers": ["Weather forecast", "Batting depth", "Over-rate"]},
-            {"market": "Session leader", "template": "First-session runs > wickets × 25", "probability": 55, "confidence": "Medium", "drivers": ["New-ball threat", "Opening batter form"]},
-        ],
-    },
+# ---------- Format profiles ----------
+FORMAT_PROFILES = {
+    "T20": "20 overs · high variance · powerplay decisive",
+    "Hundred": "100 balls · condensed powerplay · spinner leverage",
+    "ODI": "50 overs · batting depth · phase-based tempo",
+    "Test": "5 days · session-based · draw is a valid outcome",
 }
-DEFAULT_STRATEGY = FORMAT_STRATEGY["T20"]
+DEFAULT_PROFILE = FORMAT_PROFILES["T20"]
+
+# ---------- Team → key players registry ----------
+# Compact roster of top batter / top bowler per team across major leagues.
+# Fallback to "{team} top batter/bowler" when a team is not in the registry.
+TEAM_PLAYERS = {
+    # IPL
+    "Mumbai Indians": ("Rohit Sharma", "Jasprit Bumrah"),
+    "Chennai Super Kings": ("Ruturaj Gaikwad", "Ravindra Jadeja"),
+    "Royal Challengers Bengaluru": ("Virat Kohli", "Mohammed Siraj"),
+    "Royal Challengers Bangalore": ("Virat Kohli", "Mohammed Siraj"),
+    "Kolkata Knight Riders": ("Andre Russell", "Sunil Narine"),
+    "Delhi Capitals": ("Rishabh Pant", "Kuldeep Yadav"),
+    "Rajasthan Royals": ("Sanju Samson", "Yuzvendra Chahal"),
+    "Punjab Kings": ("Shikhar Dhawan", "Arshdeep Singh"),
+    "Sunrisers Hyderabad": ("Heinrich Klaasen", "Bhuvneshwar Kumar"),
+    "Gujarat Titans": ("Shubman Gill", "Mohammed Shami"),
+    "Lucknow Super Giants": ("KL Rahul", "Ravi Bishnoi"),
+    # International
+    "India": ("Virat Kohli", "Jasprit Bumrah"),
+    "Australia": ("Steve Smith", "Pat Cummins"),
+    "England": ("Joe Root", "Jofra Archer"),
+    "New Zealand": ("Kane Williamson", "Trent Boult"),
+    "South Africa": ("Aiden Markram", "Kagiso Rabada"),
+    "Pakistan": ("Babar Azam", "Shaheen Afridi"),
+    "West Indies": ("Nicholas Pooran", "Alzarri Joseph"),
+    "Sri Lanka": ("Charith Asalanka", "Wanindu Hasaranga"),
+    "Bangladesh": ("Litton Das", "Shakib Al Hasan"),
+    "Afghanistan": ("Rahmanullah Gurbaz", "Rashid Khan"),
+    "Zimbabwe": ("Sikandar Raza", "Blessing Muzarabani"),
+    "Ireland": ("Paul Stirling", "Josh Little"),
+    # CPL
+    "Trinbago Knight Riders": ("Nicholas Pooran", "Sunil Narine"),
+    "Guyana Amazon Warriors": ("Shai Hope", "Imran Tahir"),
+    "Barbados Royals": ("Rovman Powell", "Jason Holder"),
+    "Saint Lucia Kings": ("Roston Chase", "Alzarri Joseph"),
+    "Antigua & Barbuda Falcons": ("Andre Fletcher", "Sheldon Cottrell"),
+    "Jamaica Kingsmen": ("Brandon King", "Migael Pretorius"),
+    "Saint Kitts & Nevis Patriots": ("Evin Lewis", "Andre Fletcher"),
+    # BBL
+    "Sydney Sixers": ("Josh Philippe", "Sean Abbott"),
+    "Perth Scorchers": ("Josh Inglis", "Jason Behrendorff"),
+    "Sydney Thunder": ("Matthew Gilkes", "Chris Green"),
+    "Melbourne Stars": ("Marcus Stoinis", "Adam Zampa"),
+    "Melbourne Renegades": ("Aaron Finch", "Kane Richardson"),
+    "Brisbane Heat": ("Colin Munro", "Michael Neser"),
+    "Adelaide Strikers": ("Matt Short", "Rashid Khan"),
+    "Hobart Hurricanes": ("Ben McDermott", "Riley Meredith"),
+    # PSL
+    "Karachi Kings": ("Babar Azam", "Mohammad Amir"),
+    "Lahore Qalandars": ("Fakhar Zaman", "Shaheen Afridi"),
+    "Multan Sultans": ("Mohammad Rizwan", "Usama Mir"),
+    "Islamabad United": ("Alex Hales", "Faheem Ashraf"),
+    "Peshawar Zalmi": ("Saim Ayub", "Hasan Ali"),
+    "Quetta Gladiators": ("Sarfaraz Ahmed", "Naseem Shah"),
+    # The Hundred
+    "London Spirit": ("Kane Williamson", "Mark Wood"),
+    "Oval Invincibles": ("Will Jacks", "Sunil Narine"),
+    "Trent Rockets": ("Alex Hales", "Rashid Khan"),
+    "Manchester Originals": ("Jos Buttler", "Jofra Archer"),
+    "Birmingham Phoenix": ("Liam Livingstone", "Chris Woakes"),
+    "Southern Brave": ("James Vince", "Tymal Mills"),
+    "Northern Superchargers": ("Harry Brook", "Adil Rashid"),
+    "Welsh Fire": ("Tom Banton", "Naseem Shah"),
+}
+
+def resolve_players(team: str) -> tuple[str, str]:
+    if team in TEAM_PLAYERS:
+        return TEAM_PLAYERS[team]
+    return (f"{team} top batter", f"{team} top bowler")
 
 # Sport key → (format, competition label)
 SPORT_KEY_MAP = {
@@ -93,29 +117,47 @@ SUPPORTED_FORMATS = ["T20", "ODI", "Test", "Hundred"]
 FORMAT_MARKETS = {
     "T20": [
         {"key": "match_winner", "group": "Match", "label": "Match winner", "line": "Moneyline", "source": "odds"},
+        {"key": "match_mom_team", "group": "Match", "label": "Man of the match team", "line": "2-way",
+         "selections": [{"key": "home", "name": "{home}", "prob": 55}, {"key": "away", "name": "{away}", "prob": 45}]},
         {"key": "team_home_runs", "group": "Innings totals", "label": "{home} total runs", "line": "O/U 168.5",
          "selections": [{"key": "over", "name": "Over 168.5", "prob": 61}, {"key": "under", "name": "Under 168.5", "prob": 39}]},
         {"key": "team_away_runs", "group": "Innings totals", "label": "{away} total runs", "line": "O/U 168.5",
          "selections": [{"key": "over", "name": "Over 168.5", "prob": 58}, {"key": "under", "name": "Under 168.5", "prob": 42}]},
+        {"key": "match_total_runs", "group": "Innings totals", "label": "Match total runs", "line": "O/U 336.5",
+         "selections": [{"key": "over", "name": "Over 336.5", "prob": 56}, {"key": "under", "name": "Under 336.5", "prob": 44}]},
         {"key": "match_total_sixes", "group": "Match specials", "label": "Total match sixes", "line": "O/U 11.5",
          "selections": [{"key": "over", "name": "Over 11.5", "prob": 52}, {"key": "under", "name": "Under 11.5", "prob": 48}]},
         {"key": "match_total_fours", "group": "Match specials", "label": "Total match fours", "line": "O/U 24.5",
          "selections": [{"key": "over", "name": "Over 24.5", "prob": 54}, {"key": "under", "name": "Under 24.5", "prob": 46}]},
+        {"key": "highest_scoring_over", "group": "Match specials", "label": "Highest scoring over", "line": "O/U 15.5",
+         "selections": [{"key": "over", "name": "Over 15.5", "prob": 58}, {"key": "under", "name": "Under 15.5", "prob": 42}]},
         {"key": "team_home_pp", "group": "Phase", "label": "{home} powerplay runs (1-6)", "line": "O/U 51.5",
          "selections": [{"key": "over", "name": "Over 51.5", "prob": 57}, {"key": "under", "name": "Under 51.5", "prob": 43}]},
-        {"key": "team_home_top_bat", "group": "Player", "label": "{home} top batter runs", "line": "O/U 30.5",
+        {"key": "team_away_pp", "group": "Phase", "label": "{away} powerplay runs (1-6)", "line": "O/U 48.5",
+         "selections": [{"key": "over", "name": "Over 48.5", "prob": 54}, {"key": "under", "name": "Under 48.5", "prob": 46}]},
+        {"key": "first_over_runs", "group": "Phase", "label": "First over runs", "line": "O/U 6.5",
+         "selections": [{"key": "over", "name": "Over 6.5", "prob": 46}, {"key": "under", "name": "Under 6.5", "prob": 54}]},
+        {"key": "fall_first_wkt", "group": "Phase", "label": "Fall of 1st wicket", "line": "O/U 24.5 runs",
+         "selections": [{"key": "over", "name": "Over 24.5", "prob": 55}, {"key": "under", "name": "Under 24.5", "prob": 45}]},
+        {"key": "team_home_top_bat", "group": "Player", "label": "{home_batter} runs", "line": "O/U 30.5",
          "selections": [{"key": "over", "name": "Over 30.5", "prob": 54}, {"key": "under", "name": "Under 30.5", "prob": 46}]},
-        {"key": "team_home_top_bowl", "group": "Player", "label": "{home} top bowler wickets", "line": "O/U 1.5",
+        {"key": "team_away_top_bat", "group": "Player", "label": "{away_batter} runs", "line": "O/U 30.5",
+         "selections": [{"key": "over", "name": "Over 30.5", "prob": 52}, {"key": "under", "name": "Under 30.5", "prob": 48}]},
+        {"key": "team_home_top_bowl", "group": "Player", "label": "{home_bowler} wickets", "line": "O/U 1.5",
          "selections": [{"key": "over", "name": "Over 1.5", "prob": 58}, {"key": "under", "name": "Under 1.5", "prob": 42}]},
+        {"key": "team_away_top_bowl", "group": "Player", "label": "{away_bowler} wickets", "line": "O/U 1.5",
+         "selections": [{"key": "over", "name": "Over 1.5", "prob": 55}, {"key": "under", "name": "Under 1.5", "prob": 45}]},
         {"key": "any_fifty", "group": "Player", "label": "Any batter to score 50+", "line": "Yes / No",
          "selections": [{"key": "yes", "name": "Yes", "prob": 64}, {"key": "no", "name": "No", "prob": 36}]},
         {"key": "opening_partnership", "group": "Team specials", "label": "Highest opening partnership", "line": "O/U 32.5",
          "selections": [{"key": "over", "name": "Over 32.5", "prob": 52}, {"key": "under", "name": "Under 32.5", "prob": 48}]},
-        {"key": "first_over_runs", "group": "Phase", "label": "First over runs", "line": "O/U 6.5",
-         "selections": [{"key": "over", "name": "Over 6.5", "prob": 46}, {"key": "under", "name": "Under 6.5", "prob": 54}]},
+        {"key": "team_home_wkts", "group": "Team specials", "label": "{home} wickets lost", "line": "O/U 6.5",
+         "selections": [{"key": "over", "name": "Over 6.5", "prob": 48}, {"key": "under", "name": "Under 6.5", "prob": 52}]},
     ],
     "Hundred": [
         {"key": "match_winner", "group": "Match", "label": "Match winner", "line": "Moneyline", "source": "odds"},
+        {"key": "match_mom_team", "group": "Match", "label": "Man of the match team", "line": "2-way",
+         "selections": [{"key": "home", "name": "{home}", "prob": 54}, {"key": "away", "name": "{away}", "prob": 46}]},
         {"key": "team_home_runs", "group": "Innings totals", "label": "{home} total runs", "line": "O/U 148.5",
          "selections": [{"key": "over", "name": "Over 148.5", "prob": 59}, {"key": "under", "name": "Under 148.5", "prob": 41}]},
         {"key": "team_away_runs", "group": "Innings totals", "label": "{away} total runs", "line": "O/U 148.5",
@@ -124,33 +166,49 @@ FORMAT_MARKETS = {
          "selections": [{"key": "over", "name": "Over 9.5", "prob": 51}, {"key": "under", "name": "Under 9.5", "prob": 49}]},
         {"key": "match_total_fours", "group": "Match specials", "label": "Total match fours", "line": "O/U 22.5",
          "selections": [{"key": "over", "name": "Over 22.5", "prob": 58}, {"key": "under", "name": "Under 22.5", "prob": 42}]},
+        {"key": "highest_scoring_set", "group": "Match specials", "label": "Highest 5-ball set", "line": "O/U 14.5",
+         "selections": [{"key": "over", "name": "Over 14.5", "prob": 56}, {"key": "under", "name": "Under 14.5", "prob": 44}]},
         {"key": "team_home_pp", "group": "Phase", "label": "{home} first 25 balls runs", "line": "O/U 32.5",
          "selections": [{"key": "over", "name": "Over 32.5", "prob": 55}, {"key": "under", "name": "Under 32.5", "prob": 45}]},
-        {"key": "team_home_top_bat", "group": "Player", "label": "{home} top batter runs", "line": "O/U 25.5",
+        {"key": "fall_first_wkt", "group": "Phase", "label": "Fall of 1st wicket", "line": "O/U 22.5 runs",
+         "selections": [{"key": "over", "name": "Over 22.5", "prob": 53}, {"key": "under", "name": "Under 22.5", "prob": 47}]},
+        {"key": "team_home_top_bat", "group": "Player", "label": "{home_batter} runs", "line": "O/U 25.5",
          "selections": [{"key": "over", "name": "Over 25.5", "prob": 52}, {"key": "under", "name": "Under 25.5", "prob": 48}]},
-        {"key": "team_home_top_bowl", "group": "Player", "label": "{home} top bowler wickets", "line": "O/U 1.5",
+        {"key": "team_away_top_bat", "group": "Player", "label": "{away_batter} runs", "line": "O/U 25.5",
+         "selections": [{"key": "over", "name": "Over 25.5", "prob": 50}, {"key": "under", "name": "Under 25.5", "prob": 50}]},
+        {"key": "team_home_top_bowl", "group": "Player", "label": "{home_bowler} wickets", "line": "O/U 1.5",
          "selections": [{"key": "over", "name": "Over 1.5", "prob": 55}, {"key": "under", "name": "Under 1.5", "prob": 45}]},
         {"key": "any_fifty", "group": "Player", "label": "Any batter to score 50+", "line": "Yes / No",
          "selections": [{"key": "yes", "name": "Yes", "prob": 58}, {"key": "no", "name": "No", "prob": 42}]},
     ],
     "ODI": [
         {"key": "match_winner", "group": "Match", "label": "Match winner", "line": "Moneyline", "source": "odds"},
+        {"key": "match_mom_team", "group": "Match", "label": "Man of the match team", "line": "2-way",
+         "selections": [{"key": "home", "name": "{home}", "prob": 55}, {"key": "away", "name": "{away}", "prob": 45}]},
         {"key": "team_home_runs", "group": "Innings totals", "label": "{home} total runs", "line": "O/U 276.5",
          "selections": [{"key": "over", "name": "Over 276.5", "prob": 58}, {"key": "under", "name": "Under 276.5", "prob": 42}]},
         {"key": "team_away_runs", "group": "Innings totals", "label": "{away} total runs", "line": "O/U 276.5",
          "selections": [{"key": "over", "name": "Over 276.5", "prob": 55}, {"key": "under", "name": "Under 276.5", "prob": 45}]},
         {"key": "first_innings_band", "group": "Innings totals", "label": "First innings score band", "line": "250-310 range",
          "selections": [{"key": "under250", "name": "Under 250", "prob": 32}, {"key": "range", "name": "250-310", "prob": 46}, {"key": "over310", "name": "310+", "prob": 22}]},
-        {"key": "team_home_top_bat", "group": "Player", "label": "{home} top batter runs", "line": "O/U 50.5",
+        {"key": "match_total_sixes", "group": "Match specials", "label": "Total match sixes", "line": "O/U 15.5",
+         "selections": [{"key": "over", "name": "Over 15.5", "prob": 49}, {"key": "under", "name": "Under 15.5", "prob": 51}]},
+        {"key": "team_home_top_bat", "group": "Player", "label": "{home_batter} runs", "line": "O/U 50.5",
          "selections": [{"key": "over", "name": "Over 50.5", "prob": 47}, {"key": "under", "name": "Under 50.5", "prob": 53}]},
-        {"key": "team_home_top_bowl", "group": "Player", "label": "{home} top bowler wickets", "line": "O/U 2.5",
+        {"key": "team_away_top_bat", "group": "Player", "label": "{away_batter} runs", "line": "O/U 50.5",
+         "selections": [{"key": "over", "name": "Over 50.5", "prob": 45}, {"key": "under", "name": "Under 50.5", "prob": 55}]},
+        {"key": "team_home_top_bowl", "group": "Player", "label": "{home_bowler} wickets", "line": "O/U 2.5",
          "selections": [{"key": "over", "name": "Over 2.5", "prob": 51}, {"key": "under", "name": "Under 2.5", "prob": 49}]},
         {"key": "century_scored", "group": "Player", "label": "Century scored in match", "line": "Yes / No",
          "selections": [{"key": "yes", "name": "Yes", "prob": 38}, {"key": "no", "name": "No", "prob": 62}]},
+        {"key": "fifty_scored", "group": "Player", "label": "Multiple fifties scored", "line": "Yes / No",
+         "selections": [{"key": "yes", "name": "Yes", "prob": 68}, {"key": "no", "name": "No", "prob": 32}]},
         {"key": "opening_partnership", "group": "Team specials", "label": "Highest opening partnership", "line": "O/U 42.5",
          "selections": [{"key": "over", "name": "Over 42.5", "prob": 50}, {"key": "under", "name": "Under 42.5", "prob": 50}]},
-        {"key": "match_total_sixes", "group": "Match specials", "label": "Total match sixes", "line": "O/U 15.5",
-         "selections": [{"key": "over", "name": "Over 15.5", "prob": 49}, {"key": "under", "name": "Under 15.5", "prob": 51}]},
+        {"key": "team_home_wkts", "group": "Team specials", "label": "{home} wickets lost", "line": "O/U 7.5",
+         "selections": [{"key": "over", "name": "Over 7.5", "prob": 44}, {"key": "under", "name": "Under 7.5", "prob": 56}]},
+        {"key": "fall_first_wkt", "group": "Phase", "label": "Fall of 1st wicket", "line": "O/U 30.5 runs",
+         "selections": [{"key": "over", "name": "Over 30.5", "prob": 54}, {"key": "under", "name": "Under 30.5", "prob": 46}]},
     ],
     "Test": [
         {"key": "match_winner", "group": "Match", "label": "Match result (incl. Draw)", "line": "3-way", "source": "odds"},
@@ -158,12 +216,20 @@ FORMAT_MARKETS = {
          "selections": [{"key": "yes", "name": "Yes", "prob": 22}, {"key": "no", "name": "No", "prob": 78}]},
         {"key": "reaches_day5", "group": "Match", "label": "Match reaches day 5", "line": "Yes / No",
          "selections": [{"key": "yes", "name": "Yes", "prob": 48}, {"key": "no", "name": "No", "prob": 52}]},
+        {"key": "declaration", "group": "Match", "label": "Team declaration in match", "line": "Yes / No",
+         "selections": [{"key": "yes", "name": "Yes", "prob": 42}, {"key": "no", "name": "No", "prob": 58}]},
         {"key": "first_innings_runs", "group": "Innings totals", "label": "First-innings total runs", "line": "O/U 340.5",
          "selections": [{"key": "over", "name": "Over 340.5", "prob": 54}, {"key": "under", "name": "Under 340.5", "prob": 46}]},
-        {"key": "team_home_top_bat", "group": "Player", "label": "{home} top batter runs", "line": "O/U 60.5",
+        {"key": "match_total_wkts", "group": "Innings totals", "label": "Total match wickets", "line": "O/U 27.5",
+         "selections": [{"key": "over", "name": "Over 27.5", "prob": 55}, {"key": "under", "name": "Under 27.5", "prob": 45}]},
+        {"key": "team_home_top_bat", "group": "Player", "label": "{home_batter} runs", "line": "O/U 60.5",
          "selections": [{"key": "over", "name": "Over 60.5", "prob": 45}, {"key": "under", "name": "Under 60.5", "prob": 55}]},
-        {"key": "team_home_top_bowl", "group": "Player", "label": "{home} top bowler wickets", "line": "O/U 4.5",
+        {"key": "team_away_top_bat", "group": "Player", "label": "{away_batter} runs", "line": "O/U 60.5",
+         "selections": [{"key": "over", "name": "Over 60.5", "prob": 43}, {"key": "under", "name": "Under 60.5", "prob": 57}]},
+        {"key": "team_home_top_bowl", "group": "Player", "label": "{home_bowler} wickets", "line": "O/U 4.5",
          "selections": [{"key": "over", "name": "Over 4.5", "prob": 46}, {"key": "under", "name": "Under 4.5", "prob": 54}]},
+        {"key": "team_away_top_bowl", "group": "Player", "label": "{away_bowler} wickets", "line": "O/U 4.5",
+         "selections": [{"key": "over", "name": "Over 4.5", "prob": 44}, {"key": "under", "name": "Under 4.5", "prob": 56}]},
         {"key": "five_for", "group": "Player", "label": "Any bowler 5-wicket haul", "line": "Yes / No",
          "selections": [{"key": "yes", "name": "Yes", "prob": 34}, {"key": "no", "name": "No", "prob": 66}]},
         {"key": "century_scored", "group": "Player", "label": "Century scored in match", "line": "Yes / No",
@@ -176,14 +242,19 @@ FORMAT_MARKETS = {
 def build_markets(fixture: "Fixture") -> list[dict]:
     home = fixture.teams[0] if fixture.teams else "Home"
     away = fixture.teams[1] if len(fixture.teams) > 1 else "Away"
+    home_batter, home_bowler = resolve_players(home)
+    away_batter, away_bowler = resolve_players(away)
+    fmt_args = {"home": home, "away": away, "home_batter": home_batter, "home_bowler": home_bowler, "away_batter": away_batter, "away_bowler": away_bowler}
     specs = FORMAT_MARKETS.get(fixture.format, FORMAT_MARKETS["T20"])
+    live_totals = getattr(fixture, "live_totals", None) or {}
     markets = []
     for spec in specs:
         market = {
             "key": spec["key"],
             "group": spec["group"],
-            "label": spec["label"].format(home=home, away=away),
+            "label": spec["label"].format(**fmt_args),
             "line": spec.get("line", ""),
+            "source": "MODEL",
             "selections": [],
         }
         if spec.get("source") == "odds":
@@ -196,16 +267,29 @@ def build_markets(fixture: "Fixture") -> list[dict]:
                     "price": o.price,
                     "probability": round(o.probability * 100),
                 })
+            market["source"] = "LIVE"
         else:
             for sel in spec["selections"]:
                 p = sel["prob"] / 100
                 price = round(1 / p, 2) if p > 0 else 0
                 market["selections"].append({
                     "key": f"{spec['key']}_{sel['key']}",
-                    "name": sel["name"].format(home=home, away=away),
+                    "name": sel["name"].format(**fmt_args),
                     "price": price,
                     "probability": sel["prob"],
                 })
+        # Overlay live totals from bookmaker on the match_total_runs market
+        if spec["key"] == "match_total_runs" and live_totals:
+            line = live_totals.get("line")
+            over_price = live_totals.get("over")
+            under_price = live_totals.get("under")
+            if line and over_price and under_price:
+                market["line"] = f"O/U {line}"
+                market["source"] = "LIVE"
+                market["selections"] = [
+                    {"key": f"{spec['key']}_over", "name": f"Over {line}", "price": over_price, "probability": round(100 / over_price)},
+                    {"key": f"{spec['key']}_under", "name": f"Under {line}", "price": under_price, "probability": round(100 / under_price)},
+                ]
         markets.append(market)
     return markets
 
@@ -242,6 +326,7 @@ class Fixture(BaseModel):
     model_tag: str
     confidence: int
     odds: List[Outcome]
+    live_totals: Optional[dict] = None
     sample: bool = True
 
 now = datetime.now(timezone.utc)
@@ -253,26 +338,48 @@ sample_fixtures = [
 ]
 
 def normalize_live_event(raw: dict) -> Fixture:
-    # Aggregate prices per outcome across bookmakers, then take median for a cleaner card.
+    # h2h prices: aggregate across bookmakers then take median for a cleaner card.
     prices: dict[str, list[float]] = {}
+    totals_by_line: dict[float, dict[str, list[float]]] = {}
     for bookmaker in raw.get("bookmakers", []):
         for market in bookmaker.get("markets", []):
-            if market.get("key") != "h2h":
-                continue
-            for outcome in market.get("outcomes", []):
-                price = float(outcome.get("price", 0))
-                if price > 0:
-                    prices.setdefault(outcome["name"], []).append(price)
+            key = market.get("key")
+            if key == "h2h":
+                for outcome in market.get("outcomes", []):
+                    price = float(outcome.get("price", 0))
+                    if price > 0:
+                        prices.setdefault(outcome["name"], []).append(price)
+            elif key == "totals":
+                for outcome in market.get("outcomes", []):
+                    price = float(outcome.get("price", 0))
+                    line = outcome.get("point")
+                    side = outcome.get("name", "").lower()  # "Over" / "Under"
+                    if price > 0 and line is not None and side in ("over", "under"):
+                        bucket = totals_by_line.setdefault(float(line), {})
+                        bucket.setdefault(side, []).append(price)
     outcomes = []
     for name, values in prices.items():
         values.sort()
         median = values[len(values) // 2]
         outcomes.append(Outcome(name=name, price=round(median, 2), probability=round(1 / median, 3), edge=0))
     outcomes.sort(key=lambda o: o.price)
+    # Pick the most-quoted line for totals and take median over/under prices.
+    live_totals = None
+    if totals_by_line:
+        best_line = max(totals_by_line.keys(), key=lambda l: len(totals_by_line[l].get("over", [])) + len(totals_by_line[l].get("under", [])))
+        bucket = totals_by_line[best_line]
+        over_prices = sorted(bucket.get("over", []))
+        under_prices = sorted(bucket.get("under", []))
+        if over_prices and under_prices:
+            live_totals = {
+                "line": best_line,
+                "over": round(over_prices[len(over_prices) // 2], 2),
+                "under": round(under_prices[len(under_prices) // 2], 2),
+            }
     teams = [raw.get("home_team", "Home team"), raw.get("away_team", "Away team")]
     fmt, competition = resolve_format(raw.get("sport_key", ""), raw.get("sport_title", "Cricket"))
     confidence = min(86, max(52, 58 + len(prices) * 4))
-    return Fixture(id=raw["id"], competition=competition, format=fmt, venue="Venue pending", start_time=raw["commence_time"], teams=teams, status="UPCOMING", model_tag="LIVE FEED", confidence=confidence, odds=outcomes, sample=False)
+    return Fixture(id=raw["id"], competition=competition, format=fmt, venue="Venue pending", start_time=raw["commence_time"], teams=teams, status="UPCOMING", model_tag="LIVE FEED", confidence=confidence, odds=outcomes, live_totals=live_totals, sample=False)
 
 async def fetch_live_fixtures() -> list[Fixture]:
     api_key = os.environ.get("ODDS_API_KEY")
@@ -283,7 +390,7 @@ async def fetch_live_fixtures() -> list[Fixture]:
     cached_at = _LIVE_CACHE.get("at")
     if cached is not None and cached_at and (datetime.now(timezone.utc) - cached_at).total_seconds() < 30:
         return cached
-    params = {"apiKey": api_key, "regions": "uk", "markets": "h2h", "oddsFormat": "decimal"}
+    params = {"apiKey": api_key, "regions": "uk", "markets": "h2h,totals", "oddsFormat": "decimal"}
     sports = list(SPORT_KEY_MAP.keys())
     try:
         async with httpx.AsyncClient(timeout=15) as client:
@@ -329,7 +436,7 @@ async def get_formats():
         counts[f.format] = counts.get(f.format, 0) + 1
     return {
         "formats": [
-            {"key": fmt, "label": fmt, "count": counts.get(fmt, 0), "profile": FORMAT_STRATEGY[fmt]["profile"]}
+            {"key": fmt, "label": fmt, "count": counts.get(fmt, 0), "profile": FORMAT_PROFILES[fmt]}
             for fmt in SUPPORTED_FORMATS
         ],
         "total": len(items),
@@ -346,41 +453,12 @@ async def get_fixture(fixture_id: str):
 @api.get("/fixtures/{fixture_id}/predictions")
 async def get_predictions(fixture_id: str):
     fixture = await get_fixture(fixture_id)
-    strategy = FORMAT_STRATEGY.get(fixture.format, DEFAULT_STRATEGY)
     return {
         "fixture": fixture,
-        "strategy": {"format": fixture.format, "profile": strategy["profile"]},
+        "strategy": {"format": fixture.format, "profile": FORMAT_PROFILES.get(fixture.format, DEFAULT_PROFILE)},
         "markets": build_markets(fixture),
         "notice": "Analytical output only — not wagering advice.",
     }
-
-@api.get("/portfolio/predictions")
-async def get_portfolio():
-    return {"updated": now.isoformat(), "portfolios": [{"name": "Across the slate", "fixtures": 3, "probability": 18, "confidence": "Balanced", "selections": ["Mumbai Indians win", "Oval Invincibles win", "England win"]}, {"name": "Conservative signals", "fixtures": 2, "probability": 34, "confidence": "Higher", "selections": ["Mumbai Indians win", "England win"]}]}
-
-@api.get("/analytics/history")
-async def history():
-    latest = db.cricsheet_ingestion_runs.find_one({}, {"_id": 0}, sort=[("created_at", -1)])
-    if latest and latest.get("summary"):
-        return latest["summary"]
-    return {"metrics": {"accuracy": 68.4, "brier": 0.184, "tracked": 1284, "calibration": 92}, "series": [{"month": "Jan", "accuracy": 62, "calibration": 84}, {"month": "Feb", "accuracy": 65, "calibration": 88}, {"month": "Mar", "accuracy": 64, "calibration": 90}, {"month": "Apr", "accuracy": 69, "calibration": 91}, {"month": "May", "accuracy": 68, "calibration": 92}, {"month": "Jun", "accuracy": 72, "calibration": 94}], "markets": [{"name": "Match result", "samples": 512, "accuracy": "71.2%", "brier": "0.172"}, {"name": "Total runs", "samples": 406, "accuracy": "66.8%", "brier": "0.191"}, {"name": "Player props", "samples": 366, "accuracy": "64.9%", "brier": "0.204"}]}
-
-@api.get("/history")
-async def historical_matches(limit: int = 50, season: str | None = None):
-    query = {"season": season} if season else {}
-    return await _history_from_mongo(query, limit)
-
-async def _history_from_mongo(query: dict, limit: int):
-    docs = db.cricsheet_matches.find(query, {"_id": 0, "innings": 0}).sort("match_date", -1).limit(min(limit, 200))
-    return list(docs)
-
-@api.get("/history/meta")
-async def historical_meta():
-    return {"count": db.cricsheet_matches.count_documents({}), "seasons": sorted(db.cricsheet_matches.distinct("season")), "dataset": "Cricsheet IPL JSON"}
-
-
-@api.get("/analytics/model")
-async def model(): return {"version": "ensemble-v0.8.2", "trained": "2025-06-14", "features": [{"name": "Rolling team form", "importance": 28}, {"name": "Venue scoring profile", "importance": 21}, {"name": "Powerplay efficiency", "importance": 18}, {"name": "Market consensus", "importance": 16}, {"name": "Squad availability", "importance": 10}]}
 
 app.include_router(api)
 app.add_middleware(CORSMiddleware, allow_credentials=True, allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","), allow_methods=["*"], allow_headers=["*"])
