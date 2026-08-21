@@ -86,6 +86,129 @@ SPORT_KEY_MAP = {
 
 SUPPORTED_FORMATS = ["T20", "ODI", "Test", "Hundred"]
 
+# ---------- Market catalogue per format ----------
+# Standard cricket sportsbook market catalogue. Each market has a conflict key so
+# the frontend can enforce "one selection per market" like a real bet slip.
+# Probabilities are analytical baselines; prices are derived (1/prob rounded).
+FORMAT_MARKETS = {
+    "T20": [
+        {"key": "match_winner", "group": "Match", "label": "Match winner", "line": "Moneyline", "source": "odds"},
+        {"key": "team_home_runs", "group": "Innings totals", "label": "{home} total runs", "line": "O/U 168.5",
+         "selections": [{"key": "over", "name": "Over 168.5", "prob": 61}, {"key": "under", "name": "Under 168.5", "prob": 39}]},
+        {"key": "team_away_runs", "group": "Innings totals", "label": "{away} total runs", "line": "O/U 168.5",
+         "selections": [{"key": "over", "name": "Over 168.5", "prob": 58}, {"key": "under", "name": "Under 168.5", "prob": 42}]},
+        {"key": "match_total_sixes", "group": "Match specials", "label": "Total match sixes", "line": "O/U 11.5",
+         "selections": [{"key": "over", "name": "Over 11.5", "prob": 52}, {"key": "under", "name": "Under 11.5", "prob": 48}]},
+        {"key": "match_total_fours", "group": "Match specials", "label": "Total match fours", "line": "O/U 24.5",
+         "selections": [{"key": "over", "name": "Over 24.5", "prob": 54}, {"key": "under", "name": "Under 24.5", "prob": 46}]},
+        {"key": "team_home_pp", "group": "Phase", "label": "{home} powerplay runs (1-6)", "line": "O/U 51.5",
+         "selections": [{"key": "over", "name": "Over 51.5", "prob": 57}, {"key": "under", "name": "Under 51.5", "prob": 43}]},
+        {"key": "team_home_top_bat", "group": "Player", "label": "{home} top batter runs", "line": "O/U 30.5",
+         "selections": [{"key": "over", "name": "Over 30.5", "prob": 54}, {"key": "under", "name": "Under 30.5", "prob": 46}]},
+        {"key": "team_home_top_bowl", "group": "Player", "label": "{home} top bowler wickets", "line": "O/U 1.5",
+         "selections": [{"key": "over", "name": "Over 1.5", "prob": 58}, {"key": "under", "name": "Under 1.5", "prob": 42}]},
+        {"key": "any_fifty", "group": "Player", "label": "Any batter to score 50+", "line": "Yes / No",
+         "selections": [{"key": "yes", "name": "Yes", "prob": 64}, {"key": "no", "name": "No", "prob": 36}]},
+        {"key": "opening_partnership", "group": "Team specials", "label": "Highest opening partnership", "line": "O/U 32.5",
+         "selections": [{"key": "over", "name": "Over 32.5", "prob": 52}, {"key": "under", "name": "Under 32.5", "prob": 48}]},
+        {"key": "first_over_runs", "group": "Phase", "label": "First over runs", "line": "O/U 6.5",
+         "selections": [{"key": "over", "name": "Over 6.5", "prob": 46}, {"key": "under", "name": "Under 6.5", "prob": 54}]},
+    ],
+    "Hundred": [
+        {"key": "match_winner", "group": "Match", "label": "Match winner", "line": "Moneyline", "source": "odds"},
+        {"key": "team_home_runs", "group": "Innings totals", "label": "{home} total runs", "line": "O/U 148.5",
+         "selections": [{"key": "over", "name": "Over 148.5", "prob": 59}, {"key": "under", "name": "Under 148.5", "prob": 41}]},
+        {"key": "team_away_runs", "group": "Innings totals", "label": "{away} total runs", "line": "O/U 148.5",
+         "selections": [{"key": "over", "name": "Over 148.5", "prob": 56}, {"key": "under", "name": "Under 148.5", "prob": 44}]},
+        {"key": "match_total_sixes", "group": "Match specials", "label": "Total match sixes", "line": "O/U 9.5",
+         "selections": [{"key": "over", "name": "Over 9.5", "prob": 51}, {"key": "under", "name": "Under 9.5", "prob": 49}]},
+        {"key": "match_total_fours", "group": "Match specials", "label": "Total match fours", "line": "O/U 22.5",
+         "selections": [{"key": "over", "name": "Over 22.5", "prob": 58}, {"key": "under", "name": "Under 22.5", "prob": 42}]},
+        {"key": "team_home_pp", "group": "Phase", "label": "{home} first 25 balls runs", "line": "O/U 32.5",
+         "selections": [{"key": "over", "name": "Over 32.5", "prob": 55}, {"key": "under", "name": "Under 32.5", "prob": 45}]},
+        {"key": "team_home_top_bat", "group": "Player", "label": "{home} top batter runs", "line": "O/U 25.5",
+         "selections": [{"key": "over", "name": "Over 25.5", "prob": 52}, {"key": "under", "name": "Under 25.5", "prob": 48}]},
+        {"key": "team_home_top_bowl", "group": "Player", "label": "{home} top bowler wickets", "line": "O/U 1.5",
+         "selections": [{"key": "over", "name": "Over 1.5", "prob": 55}, {"key": "under", "name": "Under 1.5", "prob": 45}]},
+        {"key": "any_fifty", "group": "Player", "label": "Any batter to score 50+", "line": "Yes / No",
+         "selections": [{"key": "yes", "name": "Yes", "prob": 58}, {"key": "no", "name": "No", "prob": 42}]},
+    ],
+    "ODI": [
+        {"key": "match_winner", "group": "Match", "label": "Match winner", "line": "Moneyline", "source": "odds"},
+        {"key": "team_home_runs", "group": "Innings totals", "label": "{home} total runs", "line": "O/U 276.5",
+         "selections": [{"key": "over", "name": "Over 276.5", "prob": 58}, {"key": "under", "name": "Under 276.5", "prob": 42}]},
+        {"key": "team_away_runs", "group": "Innings totals", "label": "{away} total runs", "line": "O/U 276.5",
+         "selections": [{"key": "over", "name": "Over 276.5", "prob": 55}, {"key": "under", "name": "Under 276.5", "prob": 45}]},
+        {"key": "first_innings_band", "group": "Innings totals", "label": "First innings score band", "line": "250-310 range",
+         "selections": [{"key": "under250", "name": "Under 250", "prob": 32}, {"key": "range", "name": "250-310", "prob": 46}, {"key": "over310", "name": "310+", "prob": 22}]},
+        {"key": "team_home_top_bat", "group": "Player", "label": "{home} top batter runs", "line": "O/U 50.5",
+         "selections": [{"key": "over", "name": "Over 50.5", "prob": 47}, {"key": "under", "name": "Under 50.5", "prob": 53}]},
+        {"key": "team_home_top_bowl", "group": "Player", "label": "{home} top bowler wickets", "line": "O/U 2.5",
+         "selections": [{"key": "over", "name": "Over 2.5", "prob": 51}, {"key": "under", "name": "Under 2.5", "prob": 49}]},
+        {"key": "century_scored", "group": "Player", "label": "Century scored in match", "line": "Yes / No",
+         "selections": [{"key": "yes", "name": "Yes", "prob": 38}, {"key": "no", "name": "No", "prob": 62}]},
+        {"key": "opening_partnership", "group": "Team specials", "label": "Highest opening partnership", "line": "O/U 42.5",
+         "selections": [{"key": "over", "name": "Over 42.5", "prob": 50}, {"key": "under", "name": "Under 42.5", "prob": 50}]},
+        {"key": "match_total_sixes", "group": "Match specials", "label": "Total match sixes", "line": "O/U 15.5",
+         "selections": [{"key": "over", "name": "Over 15.5", "prob": 49}, {"key": "under", "name": "Under 15.5", "prob": 51}]},
+    ],
+    "Test": [
+        {"key": "match_winner", "group": "Match", "label": "Match result (incl. Draw)", "line": "3-way", "source": "odds"},
+        {"key": "match_draw", "group": "Match", "label": "Match to end in draw", "line": "Yes / No",
+         "selections": [{"key": "yes", "name": "Yes", "prob": 22}, {"key": "no", "name": "No", "prob": 78}]},
+        {"key": "reaches_day5", "group": "Match", "label": "Match reaches day 5", "line": "Yes / No",
+         "selections": [{"key": "yes", "name": "Yes", "prob": 48}, {"key": "no", "name": "No", "prob": 52}]},
+        {"key": "first_innings_runs", "group": "Innings totals", "label": "First-innings total runs", "line": "O/U 340.5",
+         "selections": [{"key": "over", "name": "Over 340.5", "prob": 54}, {"key": "under", "name": "Under 340.5", "prob": 46}]},
+        {"key": "team_home_top_bat", "group": "Player", "label": "{home} top batter runs", "line": "O/U 60.5",
+         "selections": [{"key": "over", "name": "Over 60.5", "prob": 45}, {"key": "under", "name": "Under 60.5", "prob": 55}]},
+        {"key": "team_home_top_bowl", "group": "Player", "label": "{home} top bowler wickets", "line": "O/U 4.5",
+         "selections": [{"key": "over", "name": "Over 4.5", "prob": 46}, {"key": "under", "name": "Under 4.5", "prob": 54}]},
+        {"key": "five_for", "group": "Player", "label": "Any bowler 5-wicket haul", "line": "Yes / No",
+         "selections": [{"key": "yes", "name": "Yes", "prob": 34}, {"key": "no", "name": "No", "prob": 66}]},
+        {"key": "century_scored", "group": "Player", "label": "Century scored in match", "line": "Yes / No",
+         "selections": [{"key": "yes", "name": "Yes", "prob": 58}, {"key": "no", "name": "No", "prob": 42}]},
+        {"key": "session_leader", "group": "Phase", "label": "First-session runs > wickets × 25", "line": "Yes / No",
+         "selections": [{"key": "yes", "name": "Yes", "prob": 55}, {"key": "no", "name": "No", "prob": 45}]},
+    ],
+}
+
+def build_markets(fixture: "Fixture") -> list[dict]:
+    home = fixture.teams[0] if fixture.teams else "Home"
+    away = fixture.teams[1] if len(fixture.teams) > 1 else "Away"
+    specs = FORMAT_MARKETS.get(fixture.format, FORMAT_MARKETS["T20"])
+    markets = []
+    for spec in specs:
+        market = {
+            "key": spec["key"],
+            "group": spec["group"],
+            "label": spec["label"].format(home=home, away=away),
+            "line": spec.get("line", ""),
+            "selections": [],
+        }
+        if spec.get("source") == "odds":
+            # Deduplicate: fixture.odds already medianed. Cap to first 3 for 3-way markets.
+            unique = {o.name: o for o in fixture.odds}
+            for i, o in enumerate(list(unique.values())[:3]):
+                market["selections"].append({
+                    "key": f"{spec['key']}_{i}",
+                    "name": o.name,
+                    "price": o.price,
+                    "probability": round(o.probability * 100),
+                })
+        else:
+            for sel in spec["selections"]:
+                p = sel["prob"] / 100
+                price = round(1 / p, 2) if p > 0 else 0
+                market["selections"].append({
+                    "key": f"{spec['key']}_{sel['key']}",
+                    "name": sel["name"].format(home=home, away=away),
+                    "price": price,
+                    "probability": sel["prob"],
+                })
+        markets.append(market)
+    return markets
+
 _LIVE_CACHE: dict = {}
 
 def resolve_format(sport_key: str, sport_title: str) -> tuple[str, str]:
@@ -223,69 +346,11 @@ async def get_fixture(fixture_id: str):
 @api.get("/fixtures/{fixture_id}/predictions")
 async def get_predictions(fixture_id: str):
     fixture = await get_fixture(fixture_id)
-    first, second = fixture.teams[0], fixture.teams[1]
     strategy = FORMAT_STRATEGY.get(fixture.format, DEFAULT_STRATEGY)
-
-    player_by_fixture = {"f-001": "Suryakumar Yadav", "f-002": "Liam Dawson", "f-003": "Jos Buttler", "f-004": "Steve Smith"}
-    player = player_by_fixture.get(fixture.id, f"{first} top batter")
-
-    win_probability = round(fixture.odds[0].probability * 100) if fixture.odds else 50
-    win_event = {
-        "market": "Match result",
-        "selection": f"{fixture.odds[0].name if fixture.odds else first} win",
-        "probability": win_probability,
-        "confidence": "High" if fixture.confidence > 70 else "Medium",
-        "drivers": strategy["match_drivers"],
-    }
-
-    events = [win_event]
-    for spec in strategy["events"]:
-        events.append({
-            "market": spec["market"],
-            "selection": spec["template"].format(player=player, home=first, away=second),
-            "probability": spec["probability"],
-            "confidence": spec["confidence"],
-            "drivers": spec["drivers"],
-        })
-
-    # Same-game multis: pair the match winner with 2-3 highest-signal secondary markets.
-    secondary = sorted(events[1:], key=lambda e: e["probability"], reverse=True)
-    def joint(*probs: float) -> int:
-        result = 1.0
-        for p in probs:
-            result *= p / 100
-        return round(result * 100)
-
-    same_game = []
-    if len(secondary) >= 1:
-        same_game.append({
-            "label": "Balanced builder",
-            "legs": [win_event["selection"], secondary[0]["selection"]],
-            "probability": joint(win_probability, secondary[0]["probability"]),
-            "confidence": "Balanced",
-        })
-    if len(secondary) >= 2:
-        same_game.append({
-            "label": "High conviction",
-            "legs": [win_event["selection"], secondary[0]["selection"], secondary[1]["selection"]],
-            "probability": joint(win_probability, secondary[0]["probability"], secondary[1]["probability"]),
-            "confidence": "Selective",
-        })
-    # A lower-probability, higher-payoff style multi from mid-tier events
-    if len(secondary) >= 3:
-        tail = secondary[-2:]
-        same_game.append({
-            "label": "Contrarian angle",
-            "legs": [tail[0]["selection"], tail[1]["selection"]],
-            "probability": joint(tail[0]["probability"], tail[1]["probability"]),
-            "confidence": "Speculative",
-        })
-
     return {
         "fixture": fixture,
         "strategy": {"format": fixture.format, "profile": strategy["profile"]},
-        "events": events,
-        "same_game": same_game,
+        "markets": build_markets(fixture),
         "notice": "Analytical output only — not wagering advice.",
     }
 
