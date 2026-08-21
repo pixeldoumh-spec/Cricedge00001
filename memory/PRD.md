@@ -32,7 +32,7 @@ CricEdge is a read-only cricket analytics engine that normalizes fixtures, odds,
 - Validated desktop and mobile navigation, detail flow, API regressions, and no-overflow behavior.
 
 ## Prioritized backlog
-- P0: Connect a compliant bookmaker/odds provider through a backend-only adapter.
+- P0: Connect a compliant bookmaker/odds provider through a backend-only adapter. **Done 2026-08-21: The Odds API live adapter is active.**
 - P1: Ingest and persist Cricsheet historic data with scheduled normalization jobs.
 - P1: Replace curated model records with a reproducible trained model artifact and backtest pipeline.
 - P2: Add live odds refresh, provider attribution links, and freshness/staleness states.
@@ -42,3 +42,8 @@ CricEdge is a read-only cricket analytics engine that normalizes fixtures, odds,
 - Confirm the odds provider and credentials/terms before enabling live data.
 - Add MongoDB serving snapshots and TTL cleanup once live ingestion is enabled.
 - Add model version comparison and exportable analytical reports.
+
+## Feature addition (2026-08-21)
+- Added The Odds API adapter with server-only credential handling, cricket sport-key polling, h2h decimal odds normalization, provider error mapping, and live/sample status flags.
+- `/api/fixtures` now returns live upcoming provider events when available; the curated fallback remains code-only and is clearly marked if ever used.
+- Verified live provider response, browser rendering, fixture detail navigation, mobile layout, and absence of key exposure.

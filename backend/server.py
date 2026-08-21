@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from typing import List
 from pathlib import Path
 import os
+import httpx
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
@@ -33,21 +34,63 @@ class Fixture(BaseModel):
     sample: bool = True
 
 now = datetime.now(timezone.utc)
-fixtures = [
+sample_fixtures = [
     Fixture(id="f-001", competition="Indian Premier League", format="T20", venue="Wankhede Stadium, Mumbai", start_time=(now + timedelta(hours=5)).isoformat(), teams=["Mumbai Indians", "Chennai Super Kings"], status="UPCOMING", model_tag="HIGH SIGNAL", confidence=78, odds=[Outcome(name="Mumbai Indians", price=1.82, probability=.58, edge=.055), Outcome(name="Chennai Super Kings", price=2.08, probability=.42, edge=.012)]),
     Fixture(id="f-002", competition="The Hundred", format="T20", venue="Lord's, London", start_time=(now + timedelta(days=1, hours=2)).isoformat(), teams=["London Spirit", "Oval Invincibles"], status="UPCOMING", model_tag="BALANCED", confidence=64, odds=[Outcome(name="London Spirit", price=2.15, probability=.44, edge=.025), Outcome(name="Oval Invincibles", price=1.70, probability=.56, edge=.018)]),
     Fixture(id="f-003", competition="International ODI", format="ODI", venue="Kensington Oval, Barbados", start_time=(now + timedelta(days=2, hours=7)).isoformat(), teams=["West Indies", "England"], status="UPCOMING", model_tag="WATCH", confidence=57, odds=[Outcome(name="West Indies", price=2.35, probability=.40, edge=-.012), Outcome(name="England", price=1.62, probability=.60, edge=.026)]),
 ]
 
+def normalize_live_event(raw: dict) -> Fixture:
+    outcomes = []
+    for bookmaker in raw.get("bookmakers", []):
+        for market in bookmaker.get("markets", []):
+            if market.get("key") != "h2h":
+                continue
+            for outcome in market.get("outcomes", []):
+                price = float(outcome.get("price", 0))
+                outcomes.append(Outcome(name=outcome["name"], price=price, probability=round(1 / price, 3) if price else 0, edge=0))
+    teams = [raw.get("home_team", "Home team"), raw.get("away_team", "Away team")]
+    confidence = min(86, max(52, 58 + len(outcomes) * 2))
+    return Fixture(id=raw["id"], competition=raw.get("sport_title", "Cricket"), format="T20", venue="Venue pending", start_time=raw["commence_time"], teams=teams, status="UPCOMING", model_tag="LIVE FEED", confidence=confidence, odds=outcomes, sample=False)
+
+async def fetch_live_fixtures() -> list[Fixture]:
+    api_key = os.environ.get("ODDS_API_KEY")
+    base_url = os.environ.get("ODDS_API_BASE")
+    if not api_key or not base_url:
+        return []
+    params = {"apiKey": api_key, "regions": "uk", "markets": "h2h", "oddsFormat": "decimal"}
+    sports = ["cricket_ipl", "cricket_big_bash", "cricket_odi", "cricket_test_match", "cricket_t20_blast"]
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            results = []
+            for sport in sports:
+                response = await client.get(f"{base_url}/sports/{sport}/odds", params=params)
+                if response.status_code == 404:
+                    continue
+                if response.status_code in (401, 403):
+                    raise HTTPException(502, "The Odds API credential or plan is invalid")
+                if response.status_code == 429:
+                    raise HTTPException(503, "The Odds API quota limit was reached")
+                response.raise_for_status()
+                results.extend(normalize_live_event(event) for event in response.json())
+            return results
+    except HTTPException:
+        raise
+    except (httpx.HTTPError, ValueError) as exc:
+        raise HTTPException(502, f"The Odds API is temporarily unavailable: {type(exc).__name__}")
+
 @api.get("/")
 async def root(): return {"message": "CricEdge API online"}
 
 @api.get("/fixtures", response_model=List[Fixture])
-async def get_fixtures(): return fixtures
+async def get_fixtures():
+    live = await fetch_live_fixtures()
+    return live if live else sample_fixtures
 
 @api.get("/fixtures/{fixture_id}", response_model=Fixture)
 async def get_fixture(fixture_id: str):
-    item = next((f for f in fixtures if f.id == fixture_id), None)
+    available = await get_fixtures()
+    item = next((f for f in available if f.id == fixture_id), None)
     if not item: raise HTTPException(404, "Fixture not found")
     return item
 
