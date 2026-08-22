@@ -15,6 +15,8 @@ class NormalizedPlayer:
 @dataclass(frozen=True)
 class NormalizedDelivery:
     innings: int
+    batting_team: str
+    bowling_team: str
     over: int
     ball: int
     batter: str
@@ -77,6 +79,8 @@ def normalize_match(match_id: str, raw: dict[str, Any]) -> CanonicalMatch:
 
     deliveries: list[NormalizedDelivery] = []
     for innings_index, innings in enumerate(raw.get("innings") or [], start=1):
+        batting_team = str(innings.get("team", ""))
+        bowling_team = next((team for team in teams if team != batting_team), "")
         for over in innings.get("overs") or []:
             over_number = int(over.get("over", 0))
             for ball_index, delivery in enumerate(over.get("deliveries") or []):
@@ -85,6 +89,8 @@ def normalize_match(match_id: str, raw: dict[str, Any]) -> CanonicalMatch:
                 deliveries.append(
                     NormalizedDelivery(
                         innings=innings_index,
+                        batting_team=batting_team,
+                        bowling_team=bowling_team,
                         over=over_number,
                         ball=ball_index,
                         batter=str(delivery.get("batter", "")),
