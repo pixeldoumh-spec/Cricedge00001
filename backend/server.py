@@ -2,12 +2,15 @@ from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, APIRouter, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 from pathlib import Path
 import os
+import uuid
 import httpx
 from pymongo import MongoClient
+
+import cric_model
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
@@ -239,7 +242,76 @@ FORMAT_MARKETS = {
     ],
 }
 
-def build_markets(fixture: "Fixture") -> list[dict]:
+def _ou(key: str, label_line: float, mean: float, sd: float) -> dict:
+    """Build a model-derived over/under market payload from a normal approximation."""
+    over = cric_model.norm_sf(label_line, mean, sd)
+    under = 1 - over
+    return {
+        "line": f"O/U {label_line}",
+        "selections": [
+            {"key": f"{key}_over", "name": f"Over {label_line}", "price": round(1 / over, 2), "probability": round(over * 100)},
+            {"key": f"{key}_under", "name": f"Under {label_line}", "price": round(1 / under, 2), "probability": round(under * 100)},
+        ],
+    }
+
+
+def _line_for(mean: float, step: int) -> float:
+    return round(mean / step) * step + 0.5
+
+
+def model_overrides(prediction: dict, home: str, away: str, fmt: str) -> dict:
+    """Map the trained model output onto sportsbook market keys."""
+    teams = prediction.get("teams") or {}
+    h = teams.get("home") or {}
+    a = teams.get("away") or {}
+    out: dict[str, dict] = {}
+    if not h or not a:
+        return out
+    step = 5 if fmt in ("T20", "Hundred") else 10
+    h_line = _line_for(h["runs_mean"], step)
+    a_line = _line_for(a["runs_mean"], step)
+    out["team_home_runs"] = _ou("team_home_runs", h_line, h["runs_mean"], h["runs_sd"])
+    out["team_away_runs"] = _ou("team_away_runs", a_line, a["runs_mean"], a["runs_sd"])
+    total_mean = h["runs_mean"] + a["runs_mean"]
+    total_sd = (h["runs_sd"] ** 2 + a["runs_sd"] ** 2) ** 0.5
+    out["match_total_runs"] = _ou("match_total_runs", _line_for(total_mean, step * 2), total_mean, total_sd)
+    out["first_innings_runs"] = _ou("first_innings_runs", _line_for(h["runs_mean"], step * 2), h["runs_mean"], h["runs_sd"])
+    out["team_home_wkts"] = _ou("team_home_wkts", round(h["wkts_mean"]) + 0.5, h["wkts_mean"], h["wkts_sd"])
+    wkt_mean = h["wkts_mean"] + a["wkts_mean"]
+    wkt_sd = (h["wkts_sd"] ** 2 + a["wkts_sd"] ** 2) ** 0.5
+    out["match_total_wkts"] = _ou("match_total_wkts", round(wkt_mean * 2) + 0.5, wkt_mean * 2, wkt_sd * 1.4)
+    win = prediction.get("win")
+    if win:
+        p_home = win["home"] / max(win["home"] + win["away"], 1e-6)
+        out["match_mom_team"] = {
+            "line": "2-way",
+            "selections": [
+                {"key": "match_mom_team_home", "name": home, "price": round(1 / max(p_home, 0.02), 2), "probability": round(p_home * 100)},
+                {"key": "match_mom_team_away", "name": away, "price": round(1 / max(1 - p_home, 0.02), 2), "probability": round((1 - p_home) * 100)},
+            ],
+        }
+    draw_rate = prediction.get("draw_rate")
+    if fmt == "Test" and draw_rate:
+        d = max(0.05, min(0.6, draw_rate))
+        out["match_draw"] = {
+            "line": "Yes / No",
+            "selections": [
+                {"key": "match_draw_yes", "name": "Yes", "price": round(1 / d, 2), "probability": round(d * 100)},
+                {"key": "match_draw_no", "name": "No", "price": round(1 / (1 - d), 2), "probability": round((1 - d) * 100)},
+            ],
+        }
+        day5 = min(0.9, d + 0.28)
+        out["reaches_day5"] = {
+            "line": "Yes / No",
+            "selections": [
+                {"key": "reaches_day5_yes", "name": "Yes", "price": round(1 / day5, 2), "probability": round(day5 * 100)},
+                {"key": "reaches_day5_no", "name": "No", "price": round(1 / (1 - day5), 2), "probability": round((1 - day5) * 100)},
+            ],
+        }
+    return out
+
+
+def build_markets(fixture: "Fixture", prediction: Optional[dict] = None) -> list[dict]:
     home = fixture.teams[0] if fixture.teams else "Home"
     away = fixture.teams[1] if len(fixture.teams) > 1 else "Away"
     home_batter, home_bowler = resolve_players(home)
@@ -247,6 +319,9 @@ def build_markets(fixture: "Fixture") -> list[dict]:
     fmt_args = {"home": home, "away": away, "home_batter": home_batter, "home_bowler": home_bowler, "away_batter": away_batter, "away_bowler": away_bowler}
     specs = FORMAT_MARKETS.get(fixture.format, FORMAT_MARKETS["T20"])
     live_totals = getattr(fixture, "live_totals", None) or {}
+    prediction = prediction or {}
+    quality = prediction.get("data_quality", "LOW")
+    modeled = model_overrides(prediction, home, away, fixture.format) if prediction.get("teams") else {}
     markets = []
     for spec in specs:
         market = {
@@ -254,7 +329,8 @@ def build_markets(fixture: "Fixture") -> list[dict]:
             "group": spec["group"],
             "label": spec["label"].format(**fmt_args),
             "line": spec.get("line", ""),
-            "source": "MODEL",
+            "source": "PRIOR",
+            "low_data": False,
             "selections": [],
         }
         if spec.get("source") == "odds":
@@ -268,6 +344,20 @@ def build_markets(fixture: "Fixture") -> list[dict]:
                     "probability": round(o.probability * 100),
                 })
             market["source"] = "LIVE"
+            win = prediction.get("win")
+            if not market["selections"] and win:
+                sides = [(home, win["home"]), (away, win["away"])] + ([("Draw", win["draw"])] if win.get("draw") else [])
+                market["selections"] = [
+                    {"key": f"{spec['key']}_{i}", "name": name, "price": round(1 / max(p, 0.01), 2), "probability": round(p * 100)}
+                    for i, (name, p) in enumerate(sides)
+                ]
+                market["source"] = "MODEL"
+        elif spec["key"] in modeled:
+            override = modeled[spec["key"]]
+            market["line"] = override["line"]
+            market["selections"] = override["selections"]
+            market["source"] = "MODEL"
+            market["low_data"] = quality == "LOW"
         else:
             for sel in spec["selections"]:
                 p = sel["prob"] / 100
@@ -328,6 +418,9 @@ class Fixture(BaseModel):
     odds: List[Outcome]
     live_totals: Optional[dict] = None
     sample: bool = True
+    data_quality: str = "LOW"
+    model_win: Optional[dict] = None
+    model_note: Optional[str] = None
 
 now = datetime.now(timezone.utc)
 sample_fixtures = [
