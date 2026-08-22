@@ -4,12 +4,21 @@ from typing import Any
 
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel, Field
 
 from app.data.cricket_catalogue import FORMAT_MARKETS, FORMAT_PROFILES, SUPPORTED_FORMATS
 from app.db.mongo import get_database
+from app.model.inference.artifact_registry import registry
+from app.model.inference.service import predict as predict_model
+from app.model.training.model_v0 import FEATURES
 
 
 api = APIRouter(prefix="/api")
+
+
+class PredictionRequest(BaseModel):
+    model_version: str = Field(default="v0", pattern="^(v0|W0)$")
+    features: dict[str, float]
 
 
 def _json(value: Any) -> Any:
@@ -68,7 +77,7 @@ def _market_payload(fixture: dict) -> list[dict]:
 
 @api.get("/health")
 def health() -> dict:
-    return {"status": "ok", "model": {"status": "not_implemented"}}
+    return {"status": "ok", "models": registry.status()}
 
 
 @api.get("/fixtures")
@@ -105,13 +114,33 @@ def get_fixture(fixture_id: str) -> dict:
     return _fixture(doc)
 
 
+@api.post("/predictions")
+def create_prediction(request: PredictionRequest) -> dict:
+    try:
+        return predict_model(request.model_version, request.features)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
 @api.get("/fixtures/{fixture_id}/predictions")
 def get_fixture_predictions(fixture_id: str) -> dict:
     fixture = get_fixture(fixture_id)
+    model_version = str(fixture.get("model_version") or "v0")
+    feature_values = fixture.get("model_features")
+    prediction = None
+    if isinstance(feature_values, dict):
+        try:
+            prediction = predict_model(model_version, feature_values)
+        except (FileNotFoundError, ValueError) as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
     markets = _market_payload(fixture)
     return {
         "fixture": fixture,
+        "prediction": prediction,
         "markets": markets,
-        "strategy": "catalogue_baseline",
-        "notice": "Model predictions are not implemented yet and are not wagering advice.",
+        "strategy": "model_artifact" if prediction else "catalogue_baseline",
+        "notice": "Model probabilities are predictive estimates, not wagering advice.",
+        "feature_contract": FEATURES,
     }
