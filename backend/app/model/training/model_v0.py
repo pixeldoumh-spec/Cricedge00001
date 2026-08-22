@@ -1,7 +1,8 @@
-"""Model v0: chronological logistic-regression baseline.
+"""Canonical Model v0: chronological 13-feature logistic-regression baseline.
 
-Consumes the leakage-safe Elo/form feature rows produced from CanonicalMatch.
-The raw Cricsheet archive is intentionally not part of the repository.
+The model consumes only pre-match state derived from CanonicalMatch. All stateful
+feature engines are updated strictly after a match result is known, so no future
+match outcome or delivery data enters a row's features.
 """
 
 from __future__ import annotations
@@ -9,23 +10,36 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Sequence
 
+import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, brier_score_loss, log_loss
 
 from app.model.data.normalizer import CanonicalMatch
-from app.model.features.team_form import build_team_features
+from app.model.features.ball_strength import BallStrengthEngine
+from app.model.features.context import ContextFeatureEngine
+from app.model.features.team_form import TeamFormEngine
 from app.model.training.splits import chronological_split
 
 FEATURES = [
     "team_elo",
     "opponent_elo",
     "elo_difference",
-    "form_3",
-    "form_5",
-    "form_10",
+    "team_form_3",
+    "team_form_5",
+    "team_form_10",
+    "venue_team_win_rate",
+    "venue_bat_first_win_rate",
+    "head_to_head_win_rate",
+    "batting_run_rate",
+    "bowling_run_rate",
+    "batting_wicket_rate",
+    "bowling_wicket_rate",
 ]
+
+INITIAL_ELO = 1500.0
+ELO_K_FACTOR = 20.0
 
 
 @dataclass(frozen=True)
@@ -36,24 +50,56 @@ class ModelV0Result:
     metrics: dict[str, float]
 
 
-def train_model_v0(matches: Sequence[CanonicalMatch]) -> tuple[Pipeline, ModelV0Result]:
-    rows = build_team_features(list(matches))
-    train_matches, validation_matches, test_matches = chronological_split(
-        [row[0] for row in rows]
-    )
-    by_id = {match.match_id: features for match, features in rows}
+def build_v0_feature_rows(matches: Sequence[CanonicalMatch]) -> list[dict]:
+    """Build the exact frozen 13-feature contract chronologically.
 
-    def frame(items):
-        import pandas as pd
-        records = []
-        for match in items:
-            f = by_id[match.match_id]
-            records.append({**f.__dict__, "target": int(match.winner == match.teams[0])})
-        return pd.DataFrame(records)
+    Each engine exposes state before the current match and is updated only after
+    that match. The three engines therefore cannot consume the current/future
+    result while constructing the current row.
+    """
+    ordered = sorted(matches, key=lambda m: m.dates[0] if m.dates else "")
+    team_engine = TeamFormEngine(initial_elo=INITIAL_ELO, k_factor=ELO_K_FACTOR)
+    context_engine = ContextFeatureEngine()
+    ball_engine = BallStrengthEngine()
+
+    rows: list[dict] = []
+    for match in ordered:
+        if len(match.teams) != 2 or match.winner not in match.teams:
+            continue
+        team, opponent = match.teams
+        team_features = team_engine.features_before(team, opponent)
+        context_features = context_engine.features_before(match)
+        ball_features = ball_engine.features_before(team, opponent)
+        row = {
+            **team_features.__dict__,
+            **context_features.__dict__,
+            **ball_features.__dict__,
+            "match_id": match.match_id,
+            "date": match.dates[0] if match.dates else "",
+            "target": int(match.winner == team),
+        }
+        rows.append(row)
+        team_engine.update_after_match(match)
+        context_engine.update_after_match(match)
+        ball_engine.update_after_match(match)
+    return rows
+
+
+def train_model_v0(matches: Sequence[CanonicalMatch]) -> tuple[Pipeline, ModelV0Result]:
+    rows = build_v0_feature_rows(matches)
+    train_matches, validation_matches, test_matches = chronological_split(
+        [row["match_id"] for row in rows]
+    )
+    by_id = {row["match_id"]: row for row in rows}
+
+    def frame(items: Sequence[str]) -> pd.DataFrame:
+        return pd.DataFrame([by_id[match_id] for match_id in items])
 
     train = frame(train_matches)
     validation = frame(validation_matches)
     test = frame(test_matches)
+    # Validation is retained for the downstream validation-only calibration step.
+    _ = validation
 
     model = Pipeline([
         ("scale", StandardScaler()),
