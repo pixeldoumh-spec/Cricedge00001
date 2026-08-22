@@ -41,8 +41,9 @@ class ArtifactRegistry:
         model = joblib.load(model_path)
         calibrator = None
         calibrated = False
-        # v0 is the only currently promoted calibrated artifact. W0's
-        # validation Platt calibrator is deliberately not production-promoted.
+        # Men's v0 is the promoted calibrated artifact. Women's W0 is now
+        # explicitly promoted with raw LogisticRegression probabilities because
+        # neither Platt nor isotonic calibration survived the final holdout.
         if version == "v0":
             calibrator_path = directory / "calibrator.joblib"
             if calibrator_path.exists():
