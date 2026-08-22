@@ -12,21 +12,11 @@ import joblib
 from app.model.training.model_v0 import FEATURES, MODEL_VERSION, LogisticRegression
 
 EXPECTED_MATCHES = 3411
-EXPECTED_SPLIT = (2387, 511, 513)
+EXPECTED_SPLIT = {"train": 2387, "validation": 511, "test": 513}
 EXPECTED_FEATURES = (
-    "team_elo",
-    "opponent_elo",
-    "elo_difference",
-    "team_form_3",
-    "team_form_5",
-    "team_form_10",
-    "venue_team_win_rate",
-    "venue_bat_first_win_rate",
-    "head_to_head_win_rate",
-    "batting_run_rate",
-    "bowling_run_rate",
-    "batting_wicket_rate",
-    "bowling_wicket_rate",
+    "team_elo", "opponent_elo", "elo_difference", "team_form_3", "team_form_5", "team_form_10",
+    "venue_team_win_rate", "venue_bat_first_win_rate", "head_to_head_win_rate",
+    "batting_run_rate", "bowling_run_rate", "batting_wicket_rate", "bowling_wicket_rate",
 )
 
 
@@ -43,42 +33,36 @@ def verify(output_dir: Path) -> None:
     calibrator_path = output_dir / "calibrator.joblib"
     checksums_path = output_dir / "SHA256SUMS.json"
     metadata_path = output_dir / "metadata.json"
-
     required = (model_path, calibrator_path, checksums_path, metadata_path)
     missing = [str(p) for p in required if not p.exists()]
     if missing:
         raise SystemExit(f"FAIL: missing artifact files: {', '.join(missing)}")
 
-    checksums = json.loads(checksums_path.read_text())
-    expected_model_sha = checksums["model.joblib"]
-    expected_calibrator_sha = checksums["calibrator.joblib"]
+    manifest = json.loads(checksums_path.read_text(encoding="utf-8"))
+    expected_files = manifest.get("files", {})
     actual_model_sha = sha256(model_path)
     actual_calibrator_sha = sha256(calibrator_path)
-    if actual_model_sha != expected_model_sha:
+    if actual_model_sha != expected_files.get("model.joblib"):
         raise SystemExit("FAIL: model.joblib SHA-256 mismatch")
-    if actual_calibrator_sha != expected_calibrator_sha:
+    if actual_calibrator_sha != expected_files.get("calibrator.joblib"):
         raise SystemExit("FAIL: calibrator.joblib SHA-256 mismatch")
 
-    metadata = json.loads(metadata_path.read_text())
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     if metadata.get("model_version") != MODEL_VERSION:
         raise SystemExit("FAIL: model version mismatch")
-    if metadata.get("match_count") != EXPECTED_MATCHES:
+    dataset = metadata.get("dataset", {})
+    if dataset.get("matches") != EXPECTED_MATCHES:
         raise SystemExit("FAIL: match count mismatch")
-    if tuple(metadata.get("split", ())) != EXPECTED_SPLIT:
+    if dataset.get("split") != EXPECTED_SPLIT:
         raise SystemExit("FAIL: chronological split mismatch")
-    if tuple(metadata.get("features", ())) != EXPECTED_FEATURES:
+    if tuple(metadata.get("features", ())) != EXPECTED_FEATURES or tuple(FEATURES) != EXPECTED_FEATURES:
         raise SystemExit("FAIL: 13-feature contract mismatch")
-    if tuple(FEATURES) != EXPECTED_FEATURES:
-        raise SystemExit("FAIL: canonical model_v0 feature contract mismatch")
 
     model = joblib.load(model_path)
     calibrator = joblib.load(calibrator_path)
-    if not hasattr(model, "predict_proba"):
-        raise SystemExit("FAIL: serialized model has no predict_proba")
-    if not hasattr(calibrator, "predict_proba"):
-        raise SystemExit("FAIL: serialized calibrator has no predict_proba")
-
-    estimator = getattr(model, "named_steps", {}).get("classifier", model)
+    if not hasattr(model, "predict_proba") or not hasattr(calibrator, "predict_proba"):
+        raise SystemExit("FAIL: serialized artifact missing predict_proba")
+    estimator = getattr(model, "named_steps", {}).get("logistic", model)
     if not isinstance(estimator, LogisticRegression):
         raise SystemExit("FAIL: serialized estimator is not LogisticRegression")
     if estimator.max_iter != 2000:
