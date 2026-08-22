@@ -3,6 +3,7 @@ from fastapi import FastAPI, APIRouter, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
+from app.schemas.fixture import Fixture, Outcome
 from typing import List, Optional
 from pathlib import Path
 import os
