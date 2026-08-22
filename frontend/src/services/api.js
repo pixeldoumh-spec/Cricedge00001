@@ -16,10 +16,17 @@ api.interceptors.response.use(
     if (error.code === "ECONNABORTED") {
       error.userMessage = "The request timed out. Please try again.";
     } else if (!error.response) {
-      error.userMessage = "Unable to reach the CricEdge API.";
+      error.userMessage = "Unable to reach the CricEdge API. Check your connection and try again.";
+    } else if (error.response.status === 400) {
+      error.userMessage = error.response.data?.detail || "The request was invalid.";
+    } else if (error.response.status === 404) {
+      error.userMessage = error.response.data?.detail || "The requested CricEdge resource was not found.";
+    } else if (error.response.status === 429) {
+      error.userMessage = "Too many requests. Please wait a moment and try again.";
     } else if (error.response.status >= 500) {
-      error.userMessage = "The CricEdge service is temporarily unavailable.";
+      error.userMessage = "The CricEdge service is temporarily unavailable. Please try again shortly.";
     }
+
     return Promise.reject(error);
   }
 );
