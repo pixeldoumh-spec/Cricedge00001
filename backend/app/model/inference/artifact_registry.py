@@ -41,10 +41,13 @@ class ArtifactRegistry:
         model = joblib.load(model_path)
         calibrator = None
         calibrated = False
-        calibrator_path = directory / "calibrator.joblib"
-        if calibrator_path.exists():
-            calibrator = joblib.load(calibrator_path)
-            calibrated = True
+        # v0 is the only currently promoted calibrated artifact. W0's
+        # validation Platt calibrator is deliberately not production-promoted.
+        if version == "v0":
+            calibrator_path = directory / "calibrator.joblib"
+            if calibrator_path.exists():
+                calibrator = joblib.load(calibrator_path)
+                calibrated = True
         artifact = LoadedArtifact(version, model, calibrator, calibrated)
         self._cache[version] = artifact
         return artifact
@@ -55,7 +58,7 @@ class ArtifactRegistry:
             directory = self._directory(version)
             result[version] = {
                 "available": (directory / "model.joblib").exists(),
-                "calibrator_available": (directory / "calibrator.joblib").exists(),
+                "calibrator_available": version == "v0" and (directory / "calibrator.joblib").exists(),
                 "directory": str(directory),
             }
         return result
