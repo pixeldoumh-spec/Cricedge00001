@@ -6,15 +6,13 @@ from typing import List, Optional
 from pathlib import Path
 import uuid
 import httpx
-from pymongo import MongoClient
 
 import cric_model
 from app.core.config import settings
+from app.db.mongo import db
 
 app = FastAPI(title="CricEdge Analytics API")
 api = APIRouter(prefix="/api")
-mongo = MongoClient(settings.mongo_url, serverSelectionTimeoutMS=3000)
-db = mongo[settings.db_name]
 
 # ---------- Format profiles ----------
 FORMAT_PROFILES = {
