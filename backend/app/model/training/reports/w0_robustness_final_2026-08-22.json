@@ -1,0 +1,59 @@
+{
+  "contract": {
+    "population": 2114,
+    "decisive": 2066,
+    "baseline_split": {
+      "train": 1446,
+      "validation": 310,
+      "test": 310
+    },
+    "features": [
+      "team_elo",
+      "opponent_elo",
+      "elo_difference",
+      "team_form_3",
+      "team_form_5",
+      "team_form_10",
+      "venue_team_win_rate",
+      "venue_bat_first_win_rate",
+      "head_to_head_win_rate",
+      "batting_run_rate",
+      "bowling_run_rate",
+      "batting_wicket_rate",
+      "bowling_wicket_rate"
+    ],
+    "estimator": "StandardScaler + LogisticRegression(max_iter=2000)",
+    "calibration": "ValidationPlattCalibrator fitted only on each validation window",
+    "baseline_test_modified": false
+  },
+  "final_holdout_execution": {
+    "train": 1585,
+    "validation": 310,
+    "holdout": 171,
+    "date_start": "2026-05-10",
+    "date_end": "2026-08-11",
+    "baseline_test_310_used_for_fit_or_calibration": false,
+    "calibrated_metrics": {
+      "accuracy": 0.7251461988304093,
+      "log_loss": 0.517928913443017,
+      "brier": 0.17414341886116125,
+      "auc": 0.8289545703338808,
+      "ece": 0.09405121196872121
+    },
+    "raw_metrics": {
+      "accuracy": 0.7368421052631579,
+      "log_loss": 0.5113817350449599,
+      "brier": 0.1698839719308561,
+      "auc": 0.8289545703338808,
+      "ece": 0.08626653256017186
+    }
+  },
+  "baseline_310_test_metrics": {
+    "accuracy": 0.7161290322580646,
+    "log_loss": 0.5287449050641639,
+    "brier": 0.17788212341928583,
+    "auc": 0.8094156253944211,
+    "ece": 0.05679022633577965
+  },
+  "decision": "W0 implementation frozen as women's reference baseline; calibrated W0 not promoted to production because validation-only Platt calibration did not survive the final temporal holdout."
+}
