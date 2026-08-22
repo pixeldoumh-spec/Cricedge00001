@@ -1,6 +1,6 @@
 {
-  "lock_version": 1,
-  "status": "contract_locked_artifacts_external",
+  "lock_version": 2,
+  "status": "production_locked",
   "domain": {
     "men": "T20",
     "women": "T20"
@@ -41,6 +41,20 @@
         "fit_scope": "validation_only",
         "test_used_for_calibration": false
       },
+      "artifact_sha256": {
+        "model.joblib": "d1f8ce99ef59ce655ee02b25eb9440acc83c95a7954b97bd433754d090614a4c",
+        "calibrator.joblib": "6723459876f142b4062fd9aa7e7c93ee9fa19863df5969480af348551b32c808",
+        "metadata.json": "4ba0f6911bb5cddfc2f5e2fecd5cdcb6be8940689c0fd42e5ffeba877ae80ed9"
+      },
+      "acceptance_fingerprint": {
+        "accuracy": 0.6920,
+        "log_loss": 0.58121235,
+        "brier_score": 0.19722380,
+        "roc_auc": 0.76850698,
+        "ece_10": 0.04980010,
+        "feature_rows_sha256": "9bb8a33338a7876a03490ff865079ca6c6bc8a6d8326763f85443aad27cbecaf",
+        "match_id_sequence_sha256": "a29e2ada9a28f7daab8479472ee5c988dc824069a65d3df1eadc79f57f73ae69"
+      },
       "artifact_files": ["model.joblib", "calibrator.joblib", "metadata.json", "SHA256SUMS.json"]
     },
     "W0": {
@@ -52,6 +66,10 @@
         "production": "raw_logistic_probabilities",
         "promoted_calibrator": false
       },
+      "artifact_sha256": {
+        "model.joblib": "3998d248ead13eb06a8f3f77290466adde22de1db2410416f99ff8c466fe665e",
+        "metadata.json": "f52b98e31f70f7501410aea815c36d9faf012e79709d04d967877c598329c08a"
+      },
       "artifact_files": ["model.joblib", "metadata.json", "SHA256SUMS.json"]
     }
   },
@@ -62,8 +80,10 @@
     "W0_calibrator_forbidden": true
   },
   "verification": {
+    "last_verified": "2026-08-22",
+    "status": "PASS",
+    "corpus_sha256_verified": true,
     "command": "python -m app.model.training.verify_production_artifacts --v0-dir backend/models/v0 --w0-dir backend/models/W0 --archive /path/to/t20s_json.zip --report backend/models/production_verification.json",
-    "required_result": "PASS",
     "required_checks": [
       "artifact files exist",
       "artifact SHA-256 matches SHA256SUMS.json",
@@ -76,5 +96,5 @@
       "source archive SHA-256 matches both artifact manifests"
     ]
   },
-  "deployment_rule": "Do not enable model predictions until the unified artifact verifier returns PASS against the exact deployment corpus."
+  "deployment_rule": "Do not enable model predictions unless the unified artifact verifier returns PASS against the exact deployment corpus."
 }
