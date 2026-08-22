@@ -17,7 +17,7 @@ def _probability(artifact, values: Mapping[str, float]) -> float:
     vector = np.asarray([[float(values[name]) for name in FEATURES]], dtype=float)
     raw = float(artifact.model.predict_proba(vector)[0, 1])
     if artifact.calibrator is not None:
-        raw = float(artifact.calibrator.predict_proba(np.asarray([[raw]], dtype=float))[0, 1])
+        raw = float(artifact.calibrator.predict_proba(np.asarray([raw], dtype=float))[0])
     return min(max(raw, 0.0), 1.0)
 
 
