@@ -42,8 +42,9 @@ def _fixture(doc: dict) -> dict:
 def _market_payload(fixture: dict) -> list[dict]:
     """Build the catalogue-backed market shape used by the frontend."""
     fmt = fixture.get("format") if fixture.get("format") in FORMAT_MARKETS else "T20"
-    teams = fixture.get("teams") or ["Home", "Away"]
-    home, away = (teams + ["Away"])[:2] if len(teams) == 1 else teams[:2]
+    teams = list(fixture.get("teams") or [])
+    home = teams[0] if teams else "Home"
+    away = teams[1] if len(teams) > 1 else "Away"
     markets = []
 
     for template in FORMAT_MARKETS.get(fmt, []):
