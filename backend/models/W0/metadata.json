@@ -1,0 +1,27 @@
+{
+  "model_version": "W0",
+  "status": "frozen_reference",
+  "production_calibration": "not_promoted",
+  "artifact_status": "buildable",
+  "feature_count": 13,
+  "features_source": "backend/app/model/training/model_v0.py",
+  "estimator": {
+    "pipeline": ["StandardScaler", "LogisticRegression"],
+    "logistic_regression_max_iter": 2000
+  },
+  "dataset": {
+    "matches": 2066,
+    "split": {
+      "train": 1446,
+      "validation": 310,
+      "test": 310
+    },
+    "ordering": "chronological",
+    "domain": "women's T20"
+  },
+  "artifact_files": ["model.joblib"],
+  "calibrator": {
+    "status": "not_promoted",
+    "reason": "final holdout did not establish a stable benefit from validation Platt calibration"
+  }
+}
