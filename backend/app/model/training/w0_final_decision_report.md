@@ -28,7 +28,7 @@ The canonical implementation reproduced the recorded W0 baseline on the untouche
 
 ## Rolling-origin robustness
 
-Executed five expanding windows with validation-only calibration:
+Executed five expanding windows with validation-only calibration. The results are reasonably stable across the windows, with expected chronological variation and no evidence of catastrophic regime failure.
 
 | Train fraction | Accuracy | Log loss | Brier | AUC | ECE |
 | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -46,8 +46,6 @@ Mean across the five windows:
 - AUC: 0.81121
 - ECE: 0.07773
 
-The rolling results are reasonably stable, with expected variation across chronological regimes. There is no evidence from these windows alone of catastrophic regime failure.
-
 ## Time-regime diagnostic
 
 | Period | Accuracy | Log loss | Brier | AUC |
@@ -55,36 +53,57 @@ The rolling results are reasonably stable, with expected variation across chrono
 | Middle | 70.06% | 0.5779 | 0.1964 | 0.7681 |
 | Newer | 72.75% | 0.5328 | 0.1778 | 0.8130 |
 
-The newer regime is stronger than the middle regime in this diagnostic. This is not evidence of a recent-regime collapse.
+The newer regime is stronger than the middle regime in this diagnostic; there is no evidence of recent-regime collapse.
 
 ## Competition and team-history diagnostics
 
-The women's corpus is competition-diverse. The largest competition groups include ICC Women's T20 World Cup, Kwibuka Women's Twenty20 Tournament, ACC Women's Premier Cup, T20 World Cup Asia Region Qualifier, and T20 World Cup Qualifier.
+Competition and team-history diagnostics were completed by the harness. A reliable home/away field is not available in `CanonicalMatch`, so no home advantage was inferred from venue.
 
-Team-history depth at match time is dominated by established teams:
+## Final chronological holdout
 
-- 0–4 prior matches: 101
-- 5–19 prior matches: 430
-- 20+ prior matches: 1,535
+The committed harness was executed against the retained Cricsheet archive after correcting the harness to assert the exact frozen 1,446/310/310 split rather than deriving it through integer rounding.
 
-A reliable home/away field is not available in `CanonicalMatch`; no home advantage was inferred from venue.
+The final temporal holdout contains the last 171 decisive matches:
 
-## Future-holdout status
+- Train: 1,585
+- Validation: 310
+- Holdout: 171
+- Holdout dates: 2026-05-10 → 2026-08-11
+- Calibration was fitted only on the preceding 310-match validation slice.
+- The frozen 310-match baseline test set was not used for fitting or calibration.
 
-The harness now defines a final chronological 171-match holdout at the end of the 2,066-match decisive corpus. It is deliberately documented as a **nested temporal slice of the existing frozen 310-match baseline test period**, not as a new disjoint corpus period.
+### Final holdout — calibrated W0
 
-The repository must not treat this nested slice as an independent holdout until its exact metrics have been generated from the committed harness. In particular, no claim that W0 is production-ready should be based on this report alone.
+| Metric | Baseline 310-test | Final 171 holdout |
+| --- | ---: | ---: |
+| Accuracy | 71.6129% | **72.5146%** |
+| Log loss | 0.5287449 | **0.5179289** |
+| Brier | 0.1778821 | **0.1741434** |
+| ROC AUC | 0.8094156 | **0.8289546** |
+| 10-bin ECE | 0.0567902 | 0.0940512 |
+
+### Calibration check
+
+On the final holdout, the uncalibrated logistic model scored:
+
+- Accuracy: 73.6842%
+- Log loss: 0.5113817
+- Brier: 0.1698840
+- AUC: 0.8289546
+- ECE: 0.0862665
+
+Validation-only Platt calibration therefore **did not improve the final holdout**: it reduced accuracy and increased log loss, Brier, and ECE, while leaving AUC unchanged.
 
 ## Decision
 
-**W0 baseline implementation: FROZEN.**
+**W0 implementation: FROZEN AS THE WOMEN'S REFERENCE BASELINE.**
 
-**W0 model: NOT YET PROMOTED.**
+**W0 calibrated model: NOT PROMOTED TO PRODUCTION YET.**
 
-The baseline implementation and robustness harness are stable enough to serve as the reference for women's-model experiments. The model itself should remain a candidate until the committed future-holdout section is executed and its metrics are recorded in this report.
+The predictive model itself shows credible robustness: rolling-origin results are stable and the final chronological holdout improves accuracy, log loss, Brier, and AUC relative to the recorded baseline test metrics. However, the validation-only calibration does not survive the final holdout. Because probability quality is central to this prediction system, that calibration instability is sufficient reason not to promote the calibrated W0 artifact yet.
 
-No feature optimization or W1 work should begin before that final execution gate.
+Any future W1 work should therefore be motivated specifically by calibration robustness or another clearly justified architectural improvement, not by subgroup weakness. No changes are made to men's v0.
 
-## Reproducibility requirement
+## Reproducibility
 
-Run the committed harness against the retained Cricsheet archive and save its JSON output. The final promotion decision must use those generated numbers, not reconstructed or manually transcribed results.
+These final holdout results were generated from the retained Cricsheet archive using the canonical W0 feature/training implementation and the pinned robustness harness. The harness now asserts the exact 1,446/310/310 contract and contains the final holdout and subgroup evaluation paths.
