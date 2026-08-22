@@ -22,6 +22,8 @@ from app.model.features.context import ContextFeatureEngine
 from app.model.features.team_form import TeamFormEngine
 from app.model.training.splits import chronological_split
 
+MODEL_VERSION = "v0"
+
 FEATURES = [
     "team_elo",
     "opponent_elo",
@@ -92,8 +94,6 @@ def train_model_v0(matches: Sequence[CanonicalMatch]) -> tuple[Pipeline, ModelV0
     train = frame(train_matches)
     validation = frame(validation_matches)
     test = frame(test_matches)
-    # Validation is intentionally retained for the downstream validation-only
-    # calibration step and is never used to fit this base estimator.
     _ = validation
 
     model = Pipeline([
