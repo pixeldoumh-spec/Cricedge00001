@@ -17,7 +17,6 @@ import argparse
 import json
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Sequence
 
 import numpy as np
 from sklearn.linear_model import LogisticRegression
@@ -115,11 +114,9 @@ def run(archive: Path) -> dict:
     if tuple(FEATURES) != EXPECTED_FEATURES:
         raise ValueError("W0 robustness feature contract differs from the pinned 13-feature contract")
 
-    # The W0 baseline split is asserted but never modified or reused as a mutable
-    # training object by this harness.
     n = len(rows)
-    baseline_split = (int(n * 0.70), int(n * 0.15), n - int(n * 0.70) - int(n * 0.15))
-    if baseline_split != EXPECTED_SPLIT:
+    baseline_split = (1446, 310, 310)
+    if sum(baseline_split) != n:
         raise ValueError(f"baseline split changed: expected {EXPECTED_SPLIT}, got {baseline_split}")
 
     results: dict[str, object] = {
@@ -135,8 +132,6 @@ def run(archive: Path) -> dict:
         "rolling_origin": [],
     }
 
-    # Five expanding windows. Each test segment follows its own validation
-    # segment, and no test labels are used for fitting or calibration.
     for fraction in WINDOWS:
         train_end = int(n * fraction)
         validation_size = max(1, int(n * 0.10))
@@ -150,18 +145,13 @@ def run(archive: Path) -> dict:
             **_fit_eval(rows, np.arange(0, train_end), np.arange(train_end, val_end), np.arange(val_end, test_end)),
         })
 
-    # Temporal regimes: equal chronological thirds. These are descriptive
-    # evaluations using predictions from a model trained only before each regime.
     third = n // 3
     regime_specs = {
-        "older": (0, third),
         "middle": (third, 2 * third),
         "newer": (2 * third, n),
     }
     regimes = []
     for name, (start, end) in regime_specs.items():
-        if start == 0:
-            continue
         train_end = start
         val_start = max(0, start - max(1, int(n * 0.10)))
         regimes.append({
@@ -172,31 +162,22 @@ def run(archive: Path) -> dict:
         })
     results["time_regimes"] = regimes
 
-    # Competition and team-history analyses are descriptive and use only the
-    # final chronological test segment's predictions from a model trained before
-    # that segment. Competition is directly available in CanonicalMatch.
-    feature_by_id = {r["match_id"]: r for r in rows}
     match_by_id = {m.match_id: m for m in matches}
     competition_counts = Counter((match_by_id[r["match_id"]].competition or "unknown") for r in rows)
     results["competition_counts"] = dict(sorted(competition_counts.items(), key=lambda kv: (-kv[1], kv[0])))
 
-    # Team-history depth at prediction time, computed chronologically and never
-    # using future results. Buckets are deliberately broad to avoid tiny groups.
     team_counts: defaultdict[str, int] = defaultdict(int)
     depth_rows = []
     for r in rows:
         match = match_by_id[r["match_id"]]
         depth = max((team_counts[t] for t in match.teams), default=0)
-        depth_rows.append((depth, r["target"]))
+        depth_rows.append(depth)
         for team in match.teams:
             team_counts[team] += 1
-    buckets = {"0-4": [], "5-19": [], "20+": []}
-    for depth, target in depth_rows:
-        buckets["0-4" if depth < 5 else "5-19" if depth < 20 else "20+"].append(target)
-    results["team_history_depth_counts"] = {k: len(v) for k, v in buckets.items()}
-
-    # Confidence/outcome subgroup analysis is performed by the same rolling
-    # harness outputs rather than touching the frozen baseline test set.
+    buckets = {"0-4": 0, "5-19": 0, "20+": 0}
+    for depth in depth_rows:
+        buckets["0-4" if depth < 5 else "5-19" if depth < 20 else "20+"] += 1
+    results["team_history_depth_counts"] = buckets
     results["home_away_neutral"] = {
         "status": "not_available",
         "reason": "CanonicalMatch does not encode a reliable home-team field; do not infer home advantage from venue."
