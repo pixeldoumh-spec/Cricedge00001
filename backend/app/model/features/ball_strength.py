@@ -47,21 +47,30 @@ class BallStrengthEngine:
         )
 
     def update_after_match(self, match: CanonicalMatch) -> None:
-        """Update team aggregates only after the complete match."""
+        """Update aggregates only after the complete match is known."""
         if len(match.teams) != 2 or not match.deliveries:
             return
-        team_a, team_b = match.teams
-        # Canonical delivery records don't currently retain the batting team.
-        # The first innings belongs to teams[0] and the second to teams[1] only
-        # in the common case; without innings-team metadata we must not guess.
-        # Keep this boundary conservative until the normalizer exposes it.
-        return
+        for delivery in match.deliveries:
+            if delivery.batting_team not in match.teams or delivery.bowling_team not in match.teams:
+                continue
+            batting = self._state[delivery.batting_team]
+            bowling = self._state[delivery.bowling_team]
+            batting.runs += delivery.total_runs
+            # Delivery records represent legal and illegal balls alike; this
+            # conservative first version excludes wides/no-balls from the ball
+            # denominator using the raw extras payload only when available is
+            # not possible here, so count every delivery consistently.
+            batting.balls += 1
+            batting.wickets_lost += int(delivery.wicket)
+            bowling.runs_conceded += delivery.total_runs
+            bowling.balls_bowled += 1
+            bowling.wickets_taken += int(delivery.wicket)
 
 
 def build_ball_strength_features(
     matches: list[CanonicalMatch],
 ) -> list[tuple[CanonicalMatch, BallStrengthFeatures]]:
-    """Build chronological ball-strength rows when innings ownership is known."""
+    """Build chronological, leakage-safe ball-strength features."""
     engine = BallStrengthEngine()
     rows: list[tuple[CanonicalMatch, BallStrengthFeatures]] = []
     for match in sorted(matches, key=lambda m: m.dates[0] if m.dates else ""):
