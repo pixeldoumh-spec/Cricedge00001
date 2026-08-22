@@ -45,8 +45,7 @@ WINDOWS = (0.50, 0.55, 0.60, 0.65, 0.70)
 def load_womens_t20(archive: Path) -> list[CanonicalMatch]:
     matches: list[CanonicalMatch] = []
     for index, raw in enumerate(iter_matches(archive)):
-        meta = raw.get("meta") or {}
-        match_id = str(meta.get("match_id") or meta.get("data_version") or index)
+        match_id = f"w20-{index:06d}"
         match = normalize_match(match_id, raw)
         if (
             match.match_type == "T20"
