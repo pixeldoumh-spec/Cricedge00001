@@ -51,12 +51,7 @@ class ModelV0Result:
 
 
 def build_v0_feature_rows(matches: Sequence[CanonicalMatch]) -> list[dict]:
-    """Build the exact frozen 13-feature contract chronologically.
-
-    Each engine exposes state before the current match and is updated only after
-    that match. The three engines therefore cannot consume the current/future
-    result while constructing the current row.
-    """
+    """Build the exact frozen 13-feature contract chronologically."""
     ordered = sorted(matches, key=lambda m: m.dates[0] if m.dates else "")
     team_engine = TeamFormEngine(initial_elo=INITIAL_ELO, k_factor=ELO_K_FACTOR)
     context_engine = ContextFeatureEngine()
@@ -70,15 +65,14 @@ def build_v0_feature_rows(matches: Sequence[CanonicalMatch]) -> list[dict]:
         team_features = team_engine.features_before(team, opponent)
         context_features = context_engine.features_before(match)
         ball_features = ball_engine.features_before(team, opponent)
-        row = {
+        rows.append({
             **team_features.__dict__,
             **context_features.__dict__,
             **ball_features.__dict__,
             "match_id": match.match_id,
             "date": match.dates[0] if match.dates else "",
             "target": int(match.winner == team),
-        }
-        rows.append(row)
+        })
         team_engine.update_after_match(match)
         context_engine.update_after_match(match)
         ball_engine.update_after_match(match)
@@ -87,18 +81,19 @@ def build_v0_feature_rows(matches: Sequence[CanonicalMatch]) -> list[dict]:
 
 def train_model_v0(matches: Sequence[CanonicalMatch]) -> tuple[Pipeline, ModelV0Result]:
     rows = build_v0_feature_rows(matches)
-    train_matches, validation_matches, test_matches = chronological_split(
-        [row["match_id"] for row in rows]
-    )
     by_id = {row["match_id"]: row for row in rows}
+    match_by_id = {match.match_id: match for match in matches}
+    eligible_matches = [match_by_id[row["match_id"]] for row in rows]
+    train_matches, validation_matches, test_matches = chronological_split(eligible_matches)
 
-    def frame(items: Sequence[str]) -> pd.DataFrame:
-        return pd.DataFrame([by_id[match_id] for match_id in items])
+    def frame(items: Sequence[CanonicalMatch]) -> pd.DataFrame:
+        return pd.DataFrame([by_id[match.match_id] for match in items])
 
     train = frame(train_matches)
     validation = frame(validation_matches)
     test = frame(test_matches)
-    # Validation is retained for the downstream validation-only calibration step.
+    # Validation is intentionally retained for the downstream validation-only
+    # calibration step and is never used to fit this base estimator.
     _ = validation
 
     model = Pipeline([
