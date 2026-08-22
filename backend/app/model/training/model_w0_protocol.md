@@ -1,6 +1,6 @@
 # Model W0 — Women's T20 protocol
 
-Status: **candidate experiment; not production**.
+Status: **frozen reference; production probability strategy selected**.
 
 ## Population
 
@@ -40,9 +40,16 @@ The stateful engines are updated only after a completed match, so the current ma
 
 - StandardScaler
 - LogisticRegression(max_iter=2000)
-- Validation-only Platt calibration
-- Test set remains untouched until final evaluation
+- **Production probability output: raw LogisticRegression probability; no calibration layer**
+- Validation-only calibration experiments were performed with raw, Platt, and isotonic candidates.
+- The untouched baseline test and final chronological holdout were not used for calibrator selection.
+
+## Calibration decision
+
+Platt was selected by validation-only 5-fold OOF scoring on both evaluation setups, but it failed to improve the final chronological holdout. Raw probabilities won the final holdout on accuracy, log loss, Brier, and AUC. Isotonic improved only ECE while materially worsening the primary metrics.
+
+Therefore **no W0 calibrator is promoted to production**. The detailed evidence is recorded in `w0_calibration_decision_report.md`.
 
 ## Promotion rule
 
-W0 must go through chronological robustness/backtesting and an independent future holdout before it can be considered for production. It does not modify or replace frozen men's Model v0.
+W0's predictive implementation is frozen. Production should use the raw model probabilities until a future calibration experiment demonstrates stable out-of-sample benefit. This decision does not modify or replace frozen men's Model v0.
