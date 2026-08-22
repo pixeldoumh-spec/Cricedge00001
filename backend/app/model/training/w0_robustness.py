@@ -117,8 +117,9 @@ def run(archive: Path) -> dict:
     if tuple(FEATURES) != EXPECTED_FEATURES:
         raise ValueError("W0 robustness feature contract differs from the pinned 13-feature contract")
     n = len(rows)
-    if sum(EXPECTED_SPLIT) != n:
-        raise ValueError("baseline split no longer sums to the decisive corpus")
+    baseline_split = EXPECTED_SPLIT
+    if sum(baseline_split) != n:
+        raise ValueError(f"baseline split changed: expected {EXPECTED_SPLIT}, got {baseline_split}")
 
     results: dict[str, object] = {
         "contract": {
@@ -127,7 +128,7 @@ def run(archive: Path) -> dict:
             "baseline_split": {"train": 1446, "validation": 310, "test": 310},
             "features": list(EXPECTED_FEATURES),
             "estimator": "StandardScaler + LogisticRegression(max_iter=2000)",
-            "calibration": "ValidationPlattCalibrator fitted only on validation slices",
+            "calibration": "ValidationPlattCalibrator fitted only on each validation window",
             "baseline_test_modified": False,
         },
         "rolling_origin": [],
@@ -168,7 +169,6 @@ def run(archive: Path) -> dict:
     results["team_history_depth_counts"] = buckets
     results["home_away_neutral"] = {"status": "not_available", "reason": "CanonicalMatch does not encode a reliable home-team field; do not infer home advantage from venue."}
 
-    # Confidence and outcome subgroups are evaluated on the frozen 310-match W0 test set.
     base_train = np.arange(0, 1446)
     base_val = np.arange(1446, 1756)
     base_test = np.arange(1756, 2066)
@@ -180,9 +180,6 @@ def run(archive: Path) -> dict:
         "metrics": _metrics(base_y, base_p),
     }
 
-    # Final future holdout: last 171 chronological matches, evaluated only after fitting
-    # on the preceding 1,895 matches. This is a nested untouched slice of the frozen
-    # baseline test period, so the baseline test remains completely unused for fitting.
     holdout_size = 171
     holdout_start = n - holdout_size
     holdout_val_size = 310
