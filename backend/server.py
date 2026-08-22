@@ -2,7 +2,6 @@ from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, APIRouter, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
 from app.schemas.fixture import Fixture, Outcome
 from app.data.cricket_catalogue import (
     FORMAT_PROFILES,
