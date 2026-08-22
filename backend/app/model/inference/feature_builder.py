@@ -1,17 +1,15 @@
-"""Build the frozen Model v0 inference feature vector.
-
-This module is deliberately narrow: it consumes already-computed historical
-state and current match context. It does not train, update Elo, or inspect
-future results.
-"""
+"""Build the frozen Model v0 inference feature vector."""
 
 from __future__ import annotations
 
 from typing import Mapping
 
-from app.model.training.model_v1 import FEATURE_NAMES
+from app.model.training.model_v0 import FEATURES
 
 
 def build_v0_features(values: Mapping[str, float]) -> dict[str, float]:
-    """Return the exact v0 feature contract in a stable order."""
-    return {name: float(values.get(name, 0.0)) for name in FEATURE_NAMES}
+    """Return the exact frozen v0 feature contract in stable training order."""
+    missing = [name for name in FEATURES if name not in values]
+    if missing:
+        raise ValueError(f"missing Model v0 features: {', '.join(missing)}")
+    return {name: float(values[name]) for name in FEATURES}
