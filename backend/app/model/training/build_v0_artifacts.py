@@ -1,15 +1,4 @@
-"""Reproducibly build the verified Model v0 artifacts from a Cricsheet ZIP.
-
-Usage:
-    python -m app.model.training.build_v0_artifacts \
-        --archive /path/to/t20s_json.zip \
-        --output-dir backend/models/v0
-
-The command calls the canonical ``train_model_v0`` implementation, then fits
-``ValidationPlattCalibrator`` using only the same chronological validation
-slice. It writes the estimator, calibrator, and SHA-256 manifest. The source
-archive itself is never copied into the repository output directory.
-"""
+"""Reproducibly build the verified Model v0 artifacts from a Cricsheet ZIP."""
 
 from __future__ import annotations
 
@@ -39,12 +28,11 @@ def load_t20_matches(archive: Path) -> list[CanonicalMatch]:
     """Normalize and filter the archive to the canonical men's T20 population."""
     matches: list[CanonicalMatch] = []
     for index, raw in enumerate(iter_matches(archive)):
-        info = raw.get("info") or {}
-        raw_id = raw.get("meta", {}).get("data_version")
-        # Cricsheet JSON filenames are the stable match identifiers, but the
-        # parser yields only JSON objects. Fall back to a deterministic ordinal
-        # when an embedded identifier is unavailable.
-        match_id = str(raw.get("meta", {}).get("match_id") or raw_id or index)
+        raw_meta = raw.get("meta") or {}
+        raw_id = raw_meta.get("match_id") or raw_meta.get("data_version") or "match"
+        # The embedded metadata value is not unique across Cricsheet files.
+        # Append the deterministic archive ordinal so every match remains distinct.
+        match_id = f"{raw_id}-{index:06d}"
         match = normalize_match(match_id, raw)
         if is_trainable_t20(match):
             matches.append(match)
@@ -79,9 +67,6 @@ def build_v0_artifacts(archive: Path, output_dir: Path) -> dict[str, object]:
             f"{result.train_size}/{result.validation_size}/{result.test_size}"
         )
 
-    # Rebuild the same pre-match feature rows solely to obtain validation
-    # predictions for calibration. The estimator itself was already fitted by
-    # the canonical train_model_v0 function and the test set remains untouched.
     rows = build_v0_feature_rows(matches)
     by_id = {row["match_id"]: row for row in rows}
     validation_frame = np.asarray(
@@ -98,29 +83,38 @@ def build_v0_artifacts(archive: Path, output_dir: Path) -> dict[str, object]:
     model_path = output_dir / "model.joblib"
     calibrator_path = output_dir / "calibrator.joblib"
     manifest_path = output_dir / "SHA256SUMS.json"
+    metadata_path = output_dir / "metadata.json"
 
     joblib.dump(model, model_path)
     joblib.dump(calibrator, calibrator_path)
 
     manifest = {
         "model_version": "v0",
-        "source_archive": str(archive),
         "source_archive_sha256": _sha256(archive),
         "match_count": len(matches),
-        "split": {
-            "train": EXPECTED_TRAIN,
-            "validation": EXPECTED_VALIDATION,
-            "test": EXPECTED_TEST,
-        },
+        "split": {"train": EXPECTED_TRAIN, "validation": EXPECTED_VALIDATION, "test": EXPECTED_TEST},
         "features": list(FEATURES),
         "estimator": "StandardScaler + LogisticRegression(max_iter=2000)",
         "calibration": "ValidationPlattCalibrator (logit-space LogisticRegression, validation-only)",
-        "files": {
-            "model.joblib": _sha256(model_path),
-            "calibrator.joblib": _sha256(calibrator_path),
-        },
+        "files": {"model.joblib": _sha256(model_path), "calibrator.joblib": _sha256(calibrator_path)},
         "reproduction_metrics": result.metrics,
     }
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    metadata = {
+        "model_version": "v0",
+        "status": "frozen_reference",
+        "artifact_status": "buildable",
+        "feature_count": len(FEATURES),
+        "features": list(FEATURES),
+        "estimator": {"pipeline": ["StandardScaler", "LogisticRegression"], "logistic_regression_max_iter": 2000},
+        "calibration": {"method": "Platt scaling", "fit_scope": "validation_only", "test_used_for_calibration": False},
+        "dataset": {"matches": EXPECTED_TOTAL, "split": {"train": EXPECTED_TRAIN, "validation": EXPECTED_VALIDATION, "test": EXPECTED_TEST}, "ordering": "chronological", "domain": "men's T20"},
+        "source_archive_sha256": _sha256(archive),
+        "artifact_files": ["model.joblib", "calibrator.joblib", "metadata.json"],
+        "reproduction_metrics": result.metrics,
+    }
+    metadata_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
+    manifest["files"]["metadata.json"] = _sha256(metadata_path)
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     return manifest
 
@@ -130,8 +124,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--archive", type=Path, required=True, help="Cricsheet T20 ZIP archive")
     parser.add_argument("--output-dir", type=Path, default=Path("backend/models/v0"))
     args = parser.parse_args(argv)
-    manifest = build_v0_artifacts(args.archive, args.output_dir)
-    print(json.dumps(manifest, indent=2))
+    print(json.dumps(build_v0_artifacts(args.archive, args.output_dir), indent=2))
     return 0
 
 
