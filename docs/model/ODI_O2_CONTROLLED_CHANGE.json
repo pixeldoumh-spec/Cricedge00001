@@ -1,0 +1,16 @@
+{
+  "model": "men_odi_o2",
+  "parent": "men_odi_o0",
+  "status": "candidate_contract",
+  "purpose": "Test whether ODI batting/bowling rate features benefit from explicit wickets-lost efficiency rather than only aggregate runs-per-ball and wickets-per-ball.",
+  "identified_weakness": "O0 represents batting output with runs-per-ball and bowling output with wickets-per-ball, but does not explicitly represent how efficiently a team converts its batting opportunity while preserving wickets. ODI innings are materially longer than T20 innings, so wicket preservation can carry distinct signal beyond scoring rate alone.",
+  "single_controlled_change": "Add one ODI-specific feature, team_a_minus_team_b_wicket_preservation_rate, defined from historical decisive innings as the signed difference in wickets-preserved rate: 1 - wickets_lost / batting_legal_balls_scaled_to_300, with each team's historical numerator and denominator accumulated strictly before the prediction date. No other O0 feature is changed.",
+  "feature_name": "team_a_minus_team_b_wicket_preservation_rate",
+  "feature_count": 14,
+  "unchanged": ["2,569-match ODI corpus","2,440 decisive supervised rows","chronological ordering","all 13 O0 features","StandardScaler","LogisticRegression(max_iter=2000)","validation-only calibration","baseline 1,708/366/366 test boundary","evaluation metrics"],
+  "no_test_set_tuning": true,
+  "no_other_feature_changes": true,
+  "no_model_algorithm_change": true,
+  "decision_rule": "O2 is accepted only if the single added feature produces credible improvement over frozen O0 across the pre-specified rolling-origin and independent future-holdout evaluation. Otherwise O0 remains the reference.",
+  "warning": "The exact mathematical implementation must be finalized and tested against Cricsheet innings semantics before training; no result should be generated from this contract alone."
+}
