@@ -1,0 +1,49 @@
+{
+  "status": "diagnostic_complete_no_model_created",
+  "purpose": "Identify a small subset of O0 components with reproducible conditional coefficient drift before proposing another model.",
+  "corpus": {
+    "sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
+    "decisive_rows": 2440,
+    "development_rows_used_for_selection": 1952,
+    "future_holdout_rows_excluded": "1952:2074 and 2074:2440 were not used to select drift candidates"
+  },
+  "method": {
+    "model": "multivariate logistic regression over all 13 O0 features",
+    "standardization": "fit separately within each chronological half before estimating coefficients",
+    "diagnostic": "compare conditional coefficients between early and late halves of five expanding chronological prefixes",
+    "prefixes": [1037,1244,1451,1658,1865],
+    "candidate_rule": "reproducible direction of early-to-late coefficient change across all five prefixes, with meaningful magnitude; bootstrap early-vs-late development-era check used as supporting evidence",
+    "future_holdout_used_for_selection": false
+  },
+  "candidates": {
+    "team_b_recent_win_rate": {
+      "delta_by_prefix": [-1.366,-1.467,-1.271,-1.611,-1.668],
+      "direction_consistent": true,
+      "interpretation": "strong reproducible negative temporal coefficient drift"
+    },
+    "team_b_runs_conceded_per_ball": {
+      "delta_by_prefix": [-0.643,-0.592,-0.491,-0.473,-0.904],
+      "direction_consistent": true,
+      "interpretation": "strong reproducible negative temporal coefficient drift"
+    },
+    "team_b_defend_win_rate": {
+      "delta_by_prefix": [0.238,0.274,0.471,1.013,1.107],
+      "direction_consistent": true,
+      "interpretation": "strong reproducible positive temporal coefficient drift, including sign transition in later prefixes"
+    }
+  },
+  "supporting_development_era_bootstrap": {
+    "team_b_recent_win_rate": {"early_coefficient":1.785604,"late_coefficient":-0.324813,"delta":-2.110418,"bootstrap_95pct_ci":[-2.411601,-0.433933]},
+    "team_b_runs_conceded_per_ball": {"early_coefficient":0.940996,"late_coefficient":-0.647730,"delta":-1.588726,"bootstrap_95pct_ci":[-2.219152,-0.382121]},
+    "team_b_defend_win_rate": {"early_coefficient":-0.876185,"late_coefficient":0.417318,"delta":1.293503,"bootstrap_95pct_ci":[0.487051,1.698471]}
+  },
+  "non_candidates": "The remaining O0 components did not meet the reproducibility rule. Some showed large early-vs-late coefficient differences, but their direction was not stable across all five expanding-prefix diagnostics or their supporting uncertainty included zero.",
+  "important_caveat": "team_a/team_b are positional representations from the O0 feature contract, not semantic home/away roles. Therefore these three positional components should not be turned directly into a production hypothesis without testing an equivalent signed/relative representation and checking that the effect is not a coding/collinearity artifact.",
+  "decision": {
+    "small_subset_identified": true,
+    "subset": ["team_b_recent_win_rate","team_b_runs_conceded_per_ball","team_b_defend_win_rate"],
+    "create_new_model": false,
+    "o0_frozen": true,
+    "next_step": "Validate whether the apparent positional asymmetry survives transformation to semantically symmetric signed differences before freezing any O14 hypothesis."
+  }
+}
