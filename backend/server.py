@@ -1,6 +1,7 @@
 """FastAPI application entrypoint with production-safe middleware."""
 
 from collections import defaultdict, deque
+from contextlib import asynccontextmanager
 import logging
 import time
 
@@ -16,9 +17,25 @@ from app.db.mongo import get_mongo_client
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger("cricedge.api")
 
+_rate_window_seconds = 60
+_rate_limit = 120
+_rate_hits: dict[str, deque[float]] = defaultdict(deque)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Manage shared application resources for the process lifetime."""
+    logger.info("Starting CricEdge API in %s mode", settings.environment)
+    yield
+    logger.info("Closing MongoDB client")
+    get_mongo_client().close()
+    _rate_hits.clear()
+
+
 app = FastAPI(
     title="CricEdge Analytics API",
     version="1.0.0",
+    lifespan=lifespan,
     docs_url="/docs" if settings.environment != "production" else None,
     redoc_url="/redoc" if settings.environment != "production" else None,
 )
@@ -34,12 +51,6 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
 )
-
-# Lightweight per-process protection for public endpoints. For multi-instance
-# deployments, use a distributed limiter at the edge/API gateway.
-_rate_window_seconds = 60
-_rate_limit = 120
-_rate_hits: dict[str, deque[float]] = defaultdict(deque)
 
 
 @app.middleware("http")
@@ -68,12 +79,6 @@ async def request_guard(request: Request, call_next):
 @app.get("/")
 def root() -> dict[str, str]:
     return {"name": "CricEdge Analytics API", "status": "ok"}
-
-
-@app.on_event("shutdown")
-def shutdown() -> None:
-    logger.info("Closing MongoDB client")
-    get_mongo_client().close()
 
 
 app.include_router(api)
