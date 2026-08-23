@@ -1,10 +1,11 @@
 """HTTP API routes for CricEdge's current frontend contract."""
 
+from math import isfinite
 from typing import Any
 
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, HTTPException, Path, Query
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.data.cricket_catalogue import FORMAT_MARKETS, FORMAT_PROFILES, SUPPORTED_FORMATS
 from app.db.mongo import get_database
@@ -17,8 +18,23 @@ api = APIRouter(prefix="/api")
 
 
 class PredictionRequest(BaseModel):
-    model_version: str = Field(default="v0", pattern="^(v0|W0)$")
-    features: dict[str, float]
+    model_config = ConfigDict(extra="forbid")
+
+    model_version: str = Field(default="v0", pattern=r"^(v0|W0)$")
+    features: dict[str, float] = Field(min_length=len(FEATURES), max_length=len(FEATURES))
+
+    @field_validator("features")
+    @classmethod
+    def validate_features(cls, value: dict[str, float]) -> dict[str, float]:
+        missing = set(FEATURES) - set(value)
+        extra = set(value) - set(FEATURES)
+        if missing:
+            raise ValueError(f"missing model features: {', '.join(sorted(missing))}")
+        if extra:
+            raise ValueError(f"unsupported model features: {', '.join(sorted(extra))}")
+        if not all(isfinite(float(item)) for item in value.values()):
+            raise ValueError("model features must be finite numbers")
+        return value
 
 
 def _json(value: Any) -> Any:
@@ -70,7 +86,7 @@ def _market_payload(fixture: dict) -> list[dict]:
                 "probability": probability,
             })
         if template.get("source") == "odds":
-            market["selections"] = fixture.get("odds", [])
+            market["selections"] = fixture.get("odds", []) or []
         markets.append(market)
     return markets
 
@@ -81,8 +97,8 @@ def health() -> dict:
 
 
 @api.get("/fixtures")
-def get_fixtures(format: str | None = Query(default=None)) -> list[dict]:
-    query = {}
+def get_fixtures(format: str | None = Query(default=None, max_length=20)) -> list[dict]:
+    query: dict[str, str] = {}
     if format and format != "ALL":
         query["format"] = format
     docs = get_database()["fixtures"].find(query).sort("start_time", 1)
@@ -105,7 +121,7 @@ def get_fixture_formats() -> dict:
 
 
 @api.get("/fixtures/{fixture_id}")
-def get_fixture(fixture_id: str) -> dict:
+def get_fixture(fixture_id: str = Path(..., min_length=1, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")) -> dict:
     doc = get_database()["fixtures"].find_one({"id": fixture_id})
     if doc is None and ObjectId.is_valid(fixture_id):
         doc = get_database()["fixtures"].find_one({"_id": ObjectId(fixture_id)})
@@ -119,13 +135,13 @@ def create_prediction(request: PredictionRequest) -> dict:
     try:
         return predict_model(request.model_version, request.features)
     except FileNotFoundError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+        raise HTTPException(status_code=503, detail="Requested model artifact is unavailable") from exc
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @api.get("/fixtures/{fixture_id}/predictions")
-def get_fixture_predictions(fixture_id: str) -> dict:
+def get_fixture_predictions(fixture_id: str = Path(..., min_length=1, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")) -> dict:
     fixture = get_fixture(fixture_id)
     model_version = str(fixture.get("model_version") or "v0")
     feature_values = fixture.get("model_features")
@@ -134,7 +150,7 @@ def get_fixture_predictions(fixture_id: str) -> dict:
         try:
             prediction = predict_model(model_version, feature_values)
         except (FileNotFoundError, ValueError) as exc:
-            raise HTTPException(status_code=503, detail=str(exc)) from exc
+            raise HTTPException(status_code=503, detail="Prediction model is temporarily unavailable") from exc
     markets = _market_payload(fixture)
     return {
         "fixture": fixture,
