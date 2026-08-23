@@ -1,0 +1,92 @@
+{
+  "model": "men_odi_o12",
+  "control": "men_odi_o0",
+  "status": "rejected_keep_o0_frozen",
+  "hypothesis": "team_a_minus_team_b_strength * log1p(minimum_pre_match_decisive_history)",
+  "corpus": {
+    "sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
+    "population_n": 2569,
+    "decisive_n": 2440,
+    "ties": 27,
+    "no_results": 102,
+    "chronology_verified": true
+  },
+  "protocol": {
+    "train": "0:1708",
+    "validation": "1708:2074",
+    "untouched_test": "2074:2440",
+    "calibration_selection": "validation_only_log_loss",
+    "test_used_for_tuning": false
+  },
+  "baseline_test": {
+    "o0": {
+      "accuracy": 0.5409836066,
+      "log_loss": 0.6749556551,
+      "brier": 0.2412253816,
+      "auc": 0.6364371500,
+      "ece": 0.0817980728
+    },
+    "o12": {
+      "accuracy": 0.5464480874,
+      "log_loss": 0.6794500000,
+      "brier": 0.2432650000,
+      "auc": 0.6358230000,
+      "ece": 0.0904730000
+    },
+    "winner_by_metric": {
+      "accuracy": "o12",
+      "log_loss": "o0",
+      "brier": "o0",
+      "auc": "o0",
+      "ece": "o0"
+    }
+  },
+  "validation": {
+    "o0_log_loss": 0.640344,
+    "o12_log_loss": 0.637904,
+    "o0_brier": 0.225902,
+    "o12_brier": 0.224009,
+    "o0_auc": 0.665032,
+    "o12_auc": 0.669305
+  },
+  "rolling_origin": {
+    "folds": 5,
+    "train_ends": [1037,1244,1451,1658,1865],
+    "o12_raw_wins": 4,
+    "o0_raw_wins": 1
+  },
+  "history_depth_test": {
+    "bucket_definition": "minimum pre-match decisive history of the two teams",
+    "o0": {
+      "20-49": {"n": 46,"log_loss": 0.7222289510},
+      "50+": {"n": 320,"log_loss": 0.6681601188}
+    },
+    "o12": {
+      "20-49": {"n": 46,"log_loss": 0.7245270000},
+      "50+": {"n": 320,"log_loss": 0.6729700000}
+    }
+  },
+  "future_holdout": {
+    "protocol": "train 0:1586, validation 1586:1952, future holdout 1952:2074",
+    "o0": {
+      "log_loss": 0.6742973212,
+      "brier": 0.2410391413,
+      "auc": 0.6513317191,
+      "ece": 0.1129682964
+    },
+    "o12": {
+      "log_loss": 0.9655960000,
+      "brier": 0.2480120000,
+      "auc": 0.6529460000,
+      "ece": 0.1341520000
+    },
+    "o0_raw_log_loss": 0.6669339724,
+    "o12_raw_log_loss": 0.6668760000
+  },
+  "decision": {
+    "promote_o12": false,
+    "keep_o0_frozen": true,
+    "reason": "O12 improves validation and raw rolling-origin behavior and slightly improves classification accuracy, but loses the untouched baseline test on log loss, Brier, AUC and ECE. The history-depth hypothesis does not improve either tested depth bucket, and validation-selected calibration fails badly on the independent future holdout.",
+    "next_direction": "Do not tune O12 post hoc. Diagnose whether remaining O0 error is primarily calibration, strength representation, matchup/context asymmetry, or temporal distribution shift before proposing O13."
+  }
+}
