@@ -1,0 +1,33 @@
+{
+  "candidate_C": [0.25, 0.5, 1.0, 2.0, 4.0],
+  "control": "men_odi_o0",
+  "corpus_sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
+  "population": {"archive_json": 2569, "decisive_rows": 2440},
+  "feature_names": ["team_a_recent_win_rate", "team_b_recent_win_rate", "team_a_batting_runs_per_ball", "team_b_batting_runs_per_ball", "team_a_wickets_per_ball", "team_b_wickets_per_ball", "team_a_runs_conceded_per_ball", "team_b_runs_conceded_per_ball", "team_a_chase_win_rate", "team_b_chase_win_rate", "team_a_defend_win_rate", "team_b_defend_win_rate", "team_a_minus_team_b_strength"],
+  "protocol": {
+    "selected_C": 0.25,
+    "candidate_validation_log_loss": [
+      {"C": 0.25, "log_loss": 0.6616525634289137},
+      {"C": 0.5, "log_loss": 0.6696403083472137},
+      {"C": 1.0, "log_loss": 0.6773569238655288},
+      {"C": 2.0, "log_loss": 0.6834417272922633},
+      {"C": 4.0, "log_loss": 0.6876476035847667}
+    ],
+    "validation_calibration": {"raw_log_loss": 0.6616525634289137, "platt_log_loss": 0.6555505628123327, "isotonic_log_loss": 0.6343056752645069, "selected": "isotonic"},
+    "test_raw": {"accuracy": 0.5792349726775956, "auc": 0.6333223516727067, "brier": 0.24458944020371104, "ece": 0.09612329539067896, "log_loss": 0.6825257880126635},
+    "test_selected_calibration": {"accuracy": 0.5355191256830601, "auc": 0.6267183803048908, "brier": 0.24471748670135438, "ece": 0.08992832013949018, "log_loss": 0.6819156940670043}
+  },
+  "rolling_origin": [
+    {"train_end": 1037, "eval_end": 1244, "o0": {"C": 1.0, "raw_log_loss": 0.6103097861264902}, "o10": {"C": 4.0, "raw_log_loss": 0.6093717366248737}},
+    {"train_end": 1244, "eval_end": 1451, "o0": {"C": 1.0, "raw_log_loss": 0.5720988686089368}, "o10": {"C": 4.0, "raw_log_loss": 0.5697936711667986}},
+    {"train_end": 1451, "eval_end": 1658, "o0": {"C": 1.0, "raw_log_loss": 0.6700829436376461}, "o10": {"C": 0.25, "raw_log_loss": 0.667544200148825}},
+    {"train_end": 1658, "eval_end": 1865, "o0": {"C": 1.0, "raw_log_loss": 0.6656628541741918}, "o10": {"C": 0.25, "raw_log_loss": 0.6410313433169008}},
+    {"train_end": 1865, "eval_end": 2072, "o0": {"C": 1.0, "raw_log_loss": 0.6576888639469212}, "o10": {"C": 0.5, "raw_log_loss": 0.6575709822825984}}
+  ],
+  "future_holdout": {
+    "o0": {"C": 1.0, "raw": {"accuracy": 0.5901639344262295, "auc": 0.6602098466505246, "brier": 0.23674910441224822, "ece": 0.14485232235750492, "log_loss": 0.6669339723514909}, "isotonic": {"accuracy": 0.5737704918032787, "auc": 0.6513317191283292, "brier": 0.241039141334517, "ece": 0.11296829641183623, "log_loss": 0.6742973212238262}},
+    "o10": {"C": 0.25, "raw": {"accuracy": 0.5901639344262295, "auc": 0.6688189400053807, "brier": 0.23319485963997807, "ece": 0.11470864215695928, "log_loss": 0.6594580990521992}, "isotonic": {"accuracy": 0.5737704918032787, "auc": 0.6454129674468658, "brier": 0.25008419755730965, "ece": 0.0998919359872215, "log_loss": 0.9709976172926442}}
+  },
+  "source_feature_names_sha256": "f2712e3e5fd012c569ddc443b8aa50595e5500418ebd5f68785ac0c205428b9d",
+  "result_schema": "ODI O10 reproduction 1"
+}
