@@ -1,0 +1,65 @@
+{
+  "status": "diagnostic_complete_no_model_created",
+  "purpose": "Test whether the three positional O0 conditional coefficient-drift candidates survive conversion to semantically symmetric signed differences.",
+  "corpus": {
+    "sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
+    "decisive_rows": 2440,
+    "development_rows_for_selection": 1952,
+    "future_holdout_used_for_selection": false
+  },
+  "representation": {
+    "features": [
+      "team_a_minus_team_b_recent_win_rate",
+      "team_a_minus_team_b_batting_runs_per_ball",
+      "team_a_minus_team_b_wickets_per_ball",
+      "team_a_minus_team_b_runs_conceded_per_ball",
+      "team_a_minus_team_b_chase_win_rate",
+      "team_a_minus_team_b_defend_win_rate"
+    ],
+    "strength_excluded": true,
+    "reason_strength_excluded": "strength is the exact mean of the six signed differences and would create perfect linear dependence if included with all six differences",
+    "semantic_rule": "positive means Team A exceeds Team B on the corresponding metric"
+  },
+  "method": {
+    "model": "multivariate logistic regression over all six signed differences",
+    "standardization": "fit separately within each early/late half",
+    "prefixes": [1037,1244,1451,1658,1865],
+    "drift": "late coefficient minus early coefficient",
+    "support": "500 bootstrap development-era resamples using only rows 0:1952"
+  },
+  "candidate_results": {
+    "recent_win_rate_difference": {
+      "delta_by_prefix": [1.454354,1.392650,1.024498,1.552278,1.689275],
+      "direction_consistent": true,
+      "bootstrap_mean": 1.733873,
+      "bootstrap_95pct_ci": [0.574383,2.849741],
+      "survives_symmetric_representation": true
+    },
+    "runs_conceded_per_ball_difference": {
+      "delta_by_prefix": [0.528942,0.399215,0.272582,0.099182,0.541208],
+      "direction_consistent": true,
+      "bootstrap_mean": 0.562685,
+      "bootstrap_95pct_ci": [0.183107,1.038840],
+      "survives_symmetric_representation": true
+    },
+    "defend_win_rate_difference": {
+      "delta_by_prefix": [-0.822426,-0.728475,-0.669871,-1.335739,-1.244342],
+      "direction_consistent": true,
+      "bootstrap_mean": -1.267435,
+      "bootstrap_95pct_ci": [-1.894633,-0.579680],
+      "survives_symmetric_representation": true
+    }
+  },
+  "other_signed_features": {
+    "batting_runs_per_ball_difference": {"direction_consistent": false,"bootstrap_95pct_ci":[-1.035121,0.083242]},
+    "wickets_per_ball_difference": {"direction_consistent": false,"bootstrap_95pct_ci":[-0.408077,0.492852]},
+    "chase_win_rate_difference": {"direction_consistent": true,"bootstrap_95pct_ci":[-1.244005,0.072320],"candidate_status":"not_reproducibly_supported_by_bootstrap"}
+  },
+  "interpretation": "The three previously identified positional candidates survive conversion to semantically symmetric signed representations. Their conditional coefficient drift is therefore not explained away by Team A/Team B positional coding alone. This does not yet prove causal or production usefulness; it only validates the structural drift signal.",
+  "decision": {
+    "three_candidates_survive": true,
+    "create_new_model": false,
+    "o0_frozen": true,
+    "next_step": "Freeze a minimal, symmetric, three-component temporal-drift hypothesis only after pre-registering its exact parameterization and chronological evaluation protocol. Do not tune against the untouched test or future holdout."
+  }
+}
