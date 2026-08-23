@@ -4,14 +4,15 @@
   "locked_corpus_sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
   "chronological_fingerprint_sha256": "2b04bca99fabde61f33f7dc9d265b797a58a36f7fb1725a2671186e764da2f64",
   "feature_fingerprint_contract": {
-    "legacy_v0": {
+    "odi_legacy_feature_fingerprint": {
       "algorithm": "sha256(canonical_json(complete_supervised_rows))",
       "value": "a64c5b01d338b08e018c92bf34c30355e41a380ba0209f190fad457bccc60d42",
       "status": "reconstructed_and_hash_validated; original_historical_implementation_not_found"
     },
-    "v1": {
-      "algorithm": "same byte serialization as legacy_v0, explicitly versioned",
-      "status": "frozen"
+    "odi_canonical_feature_fingerprint": {
+      "algorithm": "same byte serialization as the reconstructed legacy ODI fingerprint; explicitly documented as an ODI provenance contract",
+      "status": "frozen",
+      "note": "Not a model version; T20 V0/V1 terminology is reserved for the T20 model lineage."
     }
   },
   "experiments": {
@@ -20,14 +21,14 @@
       "runner": "backend/scripts/run_odi_o0_repro.py",
       "protocol": "docs/model/ODI_O0_BASELINE_REPORT.json",
       "result": "docs/model/ODI_O0_REPRODUCED_REPORT.json",
-      "provenance_status": "reproduced_exact_frozen_metrics;feature_fingerprint_legacy_v0_reconstructed_and_validated"
+      "provenance_status": "reproduced_exact_frozen_metrics;ODI_legacy_feature_fingerprint_reconstructed_and_validated"
     },
     "O12": {
       "hypothesis": "O0 strength x log1p(minimum pre-match decisive history)",
-      "runner": "backend/app/model/training/odi_o12_features.py",
+      "runner": "backend/scripts/run_odi_o12_repro.py",
       "protocol": "docs/model/ODI_O12_CONTEXT_INTERACTION_CONTROLLED_CHANGE.json",
-      "result": "docs/model/ODI_O12_EVALUATION_REPORT.json",
-      "provenance_status": "legacy_result_recorded_runner_not_yet_reconstructed"
+      "result": "docs/model/ODI_O12_REPRODUCED_REPORT.json",
+      "provenance_status": "reconstructed_and_reconciled_with_legacy_result_artifact"
     },
     "O14": {
       "hypothesis": "O0 plus chronological interactions for exactly three validated symmetric signed components",
