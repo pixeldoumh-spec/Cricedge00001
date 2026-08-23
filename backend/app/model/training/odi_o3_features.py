@@ -14,8 +14,14 @@ class O3FeatureEngine(O0FeatureEngine):
 
     def features_for(self, team_a: str, team_b: str) -> Dict[str, float]:
         values = super().features_for(team_a, team_b)
-        batting_delta = values["team_a_batting_runs_per_ball"] - values["team_b_batting_runs_per_ball"]
-        bowling_delta = values["team_a_runs_conceded_per_ball"] - values["team_b_runs_conceded_per_ball"]
+        batting_delta = (
+            values["team_a_batting_runs_per_ball"]
+            - values["team_b_batting_runs_per_ball"]
+        )
+        bowling_delta = (
+            values["team_a_runs_conceded_per_ball"]
+            - values["team_b_runs_conceded_per_ball"]
+        )
         values[O3_FEATURE_NAME] = float(batting_delta * bowling_delta)
         return values
 
@@ -38,6 +44,14 @@ def build_feature_rows(matches: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]
             engine.update(match)
             continue
         team_a, team_b = teams
-        rows.append({"match_id": str(match.get("_match_id", "")), "date": str(info["dates"][0]), "team_a": team_a, "team_b": team_b, "target": int(winner == team_a), "features": engine.features_for(team_a, team_b)})
+        features = engine.features_for(team_a, team_b)
+        rows.append({
+            "match_id": str(match.get("_match_id", "")),
+            "date": str(info["dates"][0]),
+            "team_a": team_a,
+            "team_b": team_b,
+            "target": int(winner == team_a),
+            "features": features,
+        })
         engine.update(match)
     return rows
