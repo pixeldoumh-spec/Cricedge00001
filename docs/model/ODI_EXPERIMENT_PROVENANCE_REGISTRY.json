@@ -3,13 +3,24 @@
   "corpus_contract": "docs/model/ODI_CORPUS_LOCK.json",
   "locked_corpus_sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
   "chronological_fingerprint_sha256": "2b04bca99fabde61f33f7dc9d265b797a58a36f7fb1725a2671186e764da2f64",
+  "feature_fingerprint_contract": {
+    "legacy_v0": {
+      "algorithm": "sha256(canonical_json(complete_supervised_rows))",
+      "value": "a64c5b01d338b08e018c92bf34c30355e41a380ba0209f190fad457bccc60d42",
+      "status": "reconstructed_and_hash_validated; original_historical_implementation_not_found"
+    },
+    "v1": {
+      "algorithm": "same byte serialization as legacy_v0, explicitly versioned",
+      "status": "frozen"
+    }
+  },
   "experiments": {
     "O0": {
       "hypothesis": "canonical frozen 13-feature ODI baseline",
       "runner": "backend/scripts/run_odi_o0_repro.py",
       "protocol": "docs/model/ODI_O0_BASELINE_REPORT.json",
       "result": "docs/model/ODI_O0_REPRODUCED_REPORT.json",
-      "provenance_status": "reproduced_exact_frozen_metrics;_legacy_feature_fingerprint_algorithm_unverified"
+      "provenance_status": "reproduced_exact_frozen_metrics;feature_fingerprint_legacy_v0_reconstructed_and_validated"
     },
     "O12": {
       "hypothesis": "O0 strength x log1p(minimum pre-match decisive history)",
