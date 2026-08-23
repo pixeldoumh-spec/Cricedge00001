@@ -1,0 +1,26 @@
+{
+  "model_track": "men_odi_o0",
+  "status": "baseline_executed",
+  "corpus_sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
+  "population": 2440,
+  "chronological_split": {"train": 1708, "validation": 366, "test": 366},
+  "split_policy": "70/15/15 chronological; no shuffling",
+  "feature_count": 13,
+  "feature_names": ["team_a_recent_win_rate","team_b_recent_win_rate","team_a_batting_runs_per_ball","team_b_batting_runs_per_ball","team_a_wickets_per_ball","team_b_wickets_per_ball","team_a_runs_conceded_per_ball","team_b_runs_conceded_per_ball","team_a_chase_win_rate","team_b_chase_win_rate","team_a_defend_win_rate","team_b_defend_win_rate","team_a_minus_team_b_strength"],
+  "estimator": "StandardScaler + LogisticRegression(max_iter=2000)",
+  "validation_only_calibration": true,
+  "validation_selection": {
+    "raw": {"accuracy": 0.6174863388,"log_loss": 0.6773569239,"brier": 0.2372479409,"auc": 0.6469473114,"ece": 0.0525614361},
+    "platt": {"accuracy": 0.6038251366,"log_loss": 0.6599337449,"brier": 0.2337091700,"auc": 0.6469473114,"ece": 0.0232016242},
+    "isotonic": {"accuracy": 0.6229508197,"log_loss": 0.6403444890,"brier": 0.2259016559,"auc": 0.6650317456,"ece": 0.0},
+    "selected": "isotonic"
+  },
+  "untouched_test": {
+    "raw": {"accuracy": 0.5737704918,"log_loss": 0.6815164371,"brier": 0.2440308480,"auc": 0.6368863997,"ece": 0.0932360095},
+    "platt": {"accuracy": 0.5628415301,"log_loss": 0.6795710964,"brier": 0.2433702137,"auc": 0.6368863997,"ece": 0.0829959869},
+    "isotonic": {"accuracy": 0.5409836066,"log_loss": 0.6749556551,"brier": 0.2412253816,"auc": 0.6364371499,"ece": 0.0817980728}
+  },
+  "feature_rows_fingerprint": "a64c5b01d338b08e018c92bf34c30355e41a380ba0209f190fad457bccc60d42",
+  "runtime": {"python_package_sklearn": "1.8.0"},
+  "notes": ["The 366-row test set was untouched during fitting and calibration.","Isotonic was selected from validation metrics; test metrics are reported only after selection.","This is an O0 baseline result, not a production-promotion decision."]
+}

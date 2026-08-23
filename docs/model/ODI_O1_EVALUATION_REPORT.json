@@ -1,0 +1,14 @@
+{
+  "model": "men_odi_o1",
+  "parent": "men_odi_o0",
+  "corpus": {"files":2569,"decisive_rows":2440},
+  "baseline_split": {"train":1708,"validation":366,"test":366},
+  "controlled_change": "cumulative team win rate -> last-20-decisive-match win rate; all other features and estimator unchanged",
+  "baseline_test": {"O0":{"raw":{"accuracy":0.5737704918032787,"log_loss":0.6815164370883167,"brier":0.24403084800327846,"auc":0.6368863997124802,"ece":0.09323600952228994},"platt":{"accuracy":0.5628415300546448,"log_loss":0.6795710964295608,"brier":0.2433702137094732,"auc":0.6368863997124802,"ece":0.08299598690184355},"isotonic":{"accuracy":0.5409836065573771,"log_loss":0.674955655129899,"brier":0.2412253815568532,"auc":0.6364371499595676,"ece":0.0817980727788594},"validation_selected":"isotonic"},"O1":{"raw":{"accuracy":0.5737704918032787,"log_loss":0.6860013858751324,"brier":0.24592904164829665,"auc":0.631405552726946,"ece":0.11037461485793486},"platt":{"accuracy":0.5655737704918032,"log_loss":0.6806281161620329,"brier":0.24387340552184172,"auc":0.631405552726946,"ece":0.09174342586951384},"isotonic":{"accuracy":0.5163934426229508,"log_loss":0.696280574288676,"brier":0.25113008725571545,"auc":0.6212525083111204,"ece":0.10768103487443938},"validation_selected":"isotonic"}},
+  "rolling_origin":{"train_fractions":[0.50,0.55,0.60,0.65,0.70],"O0_log_loss":[1.2152433634959288,0.6431413478249925,2.852510783189679,0.6785516146259459,0.6789285473085842],"O1_log_loss":[1.381988415801792,0.6383316003276307,2.166521913260498,0.6992078059562312,0.8392149941801892],"O0_auc":[0.6729877991109431,0.6665659921473875,0.6071356275303643,0.682161753590325,0.6660058529217409],"O1_auc":[0.6709543176014378,0.6807610993657505,0.6266700404858300,0.6715325018896448,0.6626545832153309]},
+  "time_regimes":{"O0":{"older":{"log_loss":1.166690761133482,"auc":0.7310678451982799},"newer":{"log_loss":0.762924536190488,"auc":0.5662204159693999}},"O1":{"older":{"log_loss":1.3563639787778876,"auc":0.7047897754419493},"newer":{"log_loss":0.7450284424975906,"auc":0.566160650251016}}},
+  "future_holdout":{"rows":122,"dates":["2025-05-14","2026-08-13"],"O0":{"accuracy":0.5327868852459017,"log_loss":0.7013721574973586,"brier":0.25338407607043234,"auc":0.5940860215053764,"ece":0.10463038435991853},"O1":{"accuracy":0.5491803278688525,"log_loss":0.7067179242448001,"brier":0.25645291726826897,"auc":0.5645161290322581,"ece":0.1013299397652262}},
+  "decision":"REJECT_O1",
+  "reason":"O1 does not demonstrate stable out-of-sample superiority. It worsens the frozen baseline test log loss, Brier and AUC; rolling-origin evidence is mixed and future holdout worsens log loss, Brier and AUC despite a small accuracy/ECE gain. Frozen O0 remains the ODI reference.",
+  "test_set_tuning":false
+}

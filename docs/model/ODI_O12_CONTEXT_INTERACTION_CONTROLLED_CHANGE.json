@@ -1,0 +1,29 @@
+{
+  "model": "men_odi_o12",
+  "control": "men_odi_o0",
+  "status": "frozen_for_execution",
+  "hypothesis": "O11 diagnostics show materially different probability quality by pre-match team-history depth; O12 tests whether O0 strength should be interpreted differently as available history grows.",
+  "evidence": {
+    "source": "ODI_O11_EVALUATION_REPORT.json",
+    "history_depth_bucket": "minimum pre-match decisive history of the two teams",
+    "o0_log_loss_20_49": 0.7222289510,
+    "o11_log_loss_20_49": 0.7151604159,
+    "o0_log_loss_50_plus": 0.6681601188,
+    "o11_log_loss_50_plus": 0.6796200993
+  },
+  "controlled_change": {
+    "new_feature": "team_a_minus_team_b_strength_x_history_context",
+    "base_feature": "team_a_minus_team_b_strength",
+    "history_context": "log1p(minimum pre-match decisive history of team_a and team_b)",
+    "formula": "strength_difference * log1p(min_pre_match_decisive_history)",
+    "feature_count": 14,
+    "o0_features_unchanged": true
+  },
+  "leakage_rules": [
+    "history counts are computed strictly before the current match",
+    "current-match outcome and innings are unavailable to the feature",
+    "no test-period fitting or tuning",
+    "O0 remains frozen as the control"
+  ],
+  "execution_protocol": "same O0 chronological split, validation-only calibration, baseline test, rolling-origin, regime, competition/team-depth diagnostics, future holdout"
+}

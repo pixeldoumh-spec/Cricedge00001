@@ -1,0 +1,13 @@
+{
+  "model": "men_odi_o1",
+  "parent": "men_odi_o0",
+  "purpose": "Controlled experiment targeting O0 temporal/regime drift.",
+  "identified_weakness": "O0 uses cumulative team history for its recent_win_rate features, and rolling-origin log loss deteriorates in later folds. This can overweight old regimes.",
+  "single_controlled_change": "Replace only team_a_recent_win_rate and team_b_recent_win_rate with a fixed last-20-decisive-match win rate, computed strictly from matches completed before the prediction date.",
+  "window": 20,
+  "unchanged": ["2,569-match ODI corpus","2,440 decisive supervised rows","chronological ordering","all other 11 O0 features","StandardScaler","LogisticRegression(max_iter=2000)","validation-only calibration","baseline 1,708/366/366 test boundary","evaluation metrics"],
+  "no_test_set_tuning": true,
+  "no_other_feature_changes": true,
+  "no_model_algorithm_change": true,
+  "decision_rule": "O1 is accepted only if its improvement is credible across the pre-specified rolling-origin and independent future-holdout evaluation; otherwise frozen O0 remains the reference."
+}
