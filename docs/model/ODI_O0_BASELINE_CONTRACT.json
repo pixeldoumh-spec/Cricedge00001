@@ -20,7 +20,7 @@
     "unit": "one_row_per_decisive_upcoming_match",
     "leakage_boundary": "features_for_match_d_may_use_only_information_from_matches_completed_before_d",
     "current_match_information": "none",
-    "post_match_update": "match_result_enters_team_state_only after match completion",
+    "post_match_update": "match_result_enters_team_state_only_after_match_completion",
     "missing_history_policy": "use_zero_or_neutral only where explicitly defined by feature; never backfill from future matches"
   },
   "features": [
