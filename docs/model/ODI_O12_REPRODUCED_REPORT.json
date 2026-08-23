@@ -1,0 +1,99 @@
+{
+  "model": "men_odi_o12",
+  "control": "men_odi_o0",
+  "status": "reconstructed_and_reconciled",
+  "corpus": {
+    "sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
+    "archive_json": 2569,
+    "decisive_rows": 2440,
+    "ties": 27,
+    "no_results": 102,
+    "chronology_verified": true
+  },
+  "feature_contract": {
+    "feature_count": 14,
+    "new_feature": "team_a_minus_team_b_strength_x_history_context",
+    "formula": "team_a_minus_team_b_strength * log1p(minimum_pre_match_decisive_history)",
+    "history_is_pre_match_only": true
+  },
+  "protocol": {
+    "train": "0:1708",
+    "validation": "1708:2074",
+    "untouched_test": "2074:2440",
+    "calibration_selection": "validation_only_log_loss",
+    "selected_calibration": "isotonic",
+    "test_used_for_tuning": false
+  },
+  "validation": {
+    "o0_raw_log_loss": 0.6773569239,
+    "o12_raw_log_loss": 0.6730768950,
+    "o0_platt_log_loss": 0.6599337449,
+    "o12_platt_log_loss": 0.6578967202,
+    "o0_isotonic_log_loss": 0.6403444890,
+    "o12_isotonic_log_loss": 0.6379043302,
+    "selected": "isotonic"
+  },
+  "untouched_test": {
+    "o0": {
+      "accuracy": 0.5409836066,
+      "log_loss": 0.6749556551,
+      "brier": 0.2412253816,
+      "auc": 0.6364371499,
+      "ece": 0.0817980728
+    },
+    "o12": {
+      "accuracy": 0.5464480874,
+      "log_loss": 0.6794501095,
+      "brier": 0.2432648654,
+      "auc": 0.6358231753,
+      "ece": 0.0904727003
+    },
+    "legacy_artifact_comparison": {
+      "accuracy": "exact_to_reported_precision",
+      "log_loss": "exact_to_reported_precision",
+      "brier": "exact_to_reported_precision",
+      "auc": "exact_to_reported_precision",
+      "ece": "exact_to_reported_precision"
+    }
+  },
+  "rolling_origin": {
+    "train_ends": [1037, 1244, 1451, 1658, 1865],
+    "evaluation_width": 207,
+    "o12_raw_wins": 4,
+    "o0_raw_wins": 1
+  },
+  "history_depth_test": {
+    "bucket_definition": "minimum pre-match decisive history of the two teams",
+    "o0": {
+      "20-49": {"n": 46, "log_loss": 0.7222289510},
+      "50+": {"n": 320, "log_loss": 0.6681601188}
+    },
+    "o12": {
+      "20-49": {"n": 46, "log_loss": 0.7245265287},
+      "50+": {"n": 320, "log_loss": 0.6729703742}
+    }
+  },
+  "future_holdout": {
+    "protocol": "train 0:1586, validation 1586:1952, future holdout 1952:2074",
+    "o0": {
+      "raw_log_loss": 0.6669339724,
+      "isotonic_log_loss": 0.6742973212,
+      "isotonic_brier": 0.2410391413,
+      "isotonic_auc": 0.6513317191,
+      "isotonic_ece": 0.1129682964
+    },
+    "o12": {
+      "raw_log_loss": 0.6668757525,
+      "isotonic_log_loss": 0.9655959402,
+      "isotonic_brier": 0.2480115580,
+      "isotonic_auc": 0.6529459241,
+      "isotonic_ece": 0.1341518
+    }
+  },
+  "decision_reconciliation": {
+    "legacy_decision": "REJECTED — keep O0 frozen",
+    "reconstructed_decision": "REJECTED — keep O0 frozen",
+    "provenance_status": "runner reconstructed; baseline test, validation, history-depth, rolling-origin direction, and future-holdout conclusions reconcile with legacy artifact",
+    "next_direction": "do not tune O12 post hoc; retain diagnostic lineage and O0 as control"
+  }
+}
