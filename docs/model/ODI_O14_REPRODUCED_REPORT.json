@@ -1,0 +1,37 @@
+{
+  "schema": "ODI-O14-reproduction-1",
+  "status": "executed",
+  "corpus_sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
+  "archive_json": 2569,
+  "decisive_rows": 2440,
+  "feature_row_fingerprint": "d1927e95ff0571f6ce97e1120b6b452bb2afc4eb000332c92052f46fbe8e196f",
+  "legacy_fingerprint_expected": "a64c5b01d338b08e018c92bf34c30355e41a380ba0209f190fad457bccc60d42",
+  "legacy_fingerprint_match": false,
+  "main_split": {
+    "train": {"indices": [0, 1708], "log_loss": 0.5881672229, "brier": 0.2022793107, "auc": 0.7413855716, "ece": 0.0231978514, "accuracy": 0.6814988290},
+    "validation_raw": {"indices": [1708, 2074], "log_loss": 0.6505547457, "brier": 0.2281948212, "auc": 0.6690337917, "ece": 0.0868082625, "accuracy": 0.6393442623},
+    "validation_platt": {"log_loss": 0.6464451674, "brier": 0.2272998340, "auc": 0.6690337917, "ece": 0.0560304378, "accuracy": 0.6420765027},
+    "validation_isotonic": {"log_loss": 0.6187405264, "brier": 0.2157341554, "auc": 0.6941142840, "ece": 0.0, "accuracy": 0.6557377049},
+    "selected_calibration": "isotonic",
+    "test_raw": {"indices": [2074, 2440], "log_loss": 0.6768493413, "brier": 0.2412659571, "auc": 0.6507532421, "ece": 0.0989661429, "accuracy": 0.5874316940},
+    "test_selected_calibration": {"log_loss": 0.6744768072, "brier": 0.2415423519, "auc": 0.6425918716, "ece": 0.0935917965, "accuracy": 0.5491803279}
+  },
+  "rolling_origin": [
+    {"train_end": 1037, "eval_end": 1244, "o0_log_loss": 0.6103097861, "o14_log_loss": 0.6179575235, "delta": 0.0076477374},
+    {"train_end": 1244, "eval_end": 1451, "o0_log_loss": 0.5720988686, "o14_log_loss": 0.5861034208, "delta": 0.0140045522},
+    {"train_end": 1451, "eval_end": 1658, "o0_log_loss": 0.6700829436, "o14_log_loss": 0.6670227232, "delta": -0.0030602204},
+    {"train_end": 1658, "eval_end": 1865, "o0_log_loss": 0.6656628542, "o14_log_loss": 0.6207839218, "delta": -0.0448789324},
+    {"train_end": 1865, "eval_end": 2072, "o0_log_loss": 0.6576888639, "o14_log_loss": 0.6686264642, "delta": 0.0109376002}
+  ],
+  "future_holdout": {
+    "o0": {"validation_selected": "isotonic", "future_raw_log_loss": 0.6669339724, "future_selected_log_loss": 0.6742973212, "future_selected_brier": 0.2410391413, "future_selected_auc": 0.6513317191, "future_selected_ece": 0.1129682964},
+    "o14": {"validation_selected": "isotonic", "future_raw_log_loss": 0.6718827271, "future_selected_log_loss": 0.6788192108, "future_selected_brier": 0.2415629458, "future_selected_auc": 0.6498520312, "future_selected_ece": 0.0972298262}
+  },
+  "legacy_reconciliation": {
+    "status": "not_reconciled",
+    "reason": "No preserved O14 evaluation artifact was found in the repository; therefore no legacy numerical result was treated as authoritative.",
+    "important_finding": "The reconstructed feature-row fingerprint does not equal the historical O0 fingerprint, so the prior claim that the current serialization reproduced the legacy fingerprint is withdrawn."
+  },
+  "full_predictions_artifact": "local_execution:/mnt/data/ODI_O14_REPRODUCED_RESULT.json",
+  "full_predictions_sha256": "095693174830e0a6d6abea603901589b1df2dfb137c6c60f7a6f7afa49c9c8bb"
+}
