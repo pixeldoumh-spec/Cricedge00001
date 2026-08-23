@@ -1,0 +1,48 @@
+{
+  "diagnostic": "D5_chronological_adaptive_calibration",
+  "status": "completed",
+  "control": "frozen O0",
+  "corpus": {
+    "sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
+    "decisive_rows": 2440
+  },
+  "question": "Can strictly chronological low-complexity adaptive calibration improve later-period probability quality while preserving O0 ranking within each chronological evaluation window?",
+  "protocol": {
+    "rolling_origin_train_ends": [1037, 1244, 1451, 1658, 1865],
+    "calibration_block_size": 104,
+    "evaluation_block_size": 104,
+    "all_calibration_outcomes_precede_each_evaluation_block": true,
+    "o0_refit_per_rolling_origin": true,
+    "future_holdout": "train 0:1586; calibration 1586:1952; evaluation 1952:2074",
+    "test_tuning": false
+  },
+  "methods": {
+    "raw_o0": "chronologically trained StandardScaler + LogisticRegression(max_iter=2000), no calibration",
+    "expanding_platt": "Platt calibration fitted only on outcomes observed before each evaluation window",
+    "rolling366_platt": "Platt calibration fitted only on the immediately preceding 366 observed outcomes",
+    "block_platt": "Platt calibration fitted only on the immediately preceding 104-row calibration block"
+  },
+  "rolling_origin_aggregate": {
+    "raw_o0": {"log_loss": 0.6291348609, "brier": 0.2193985682, "auc": 0.6810244821, "ece": 0.0329371092},
+    "expanding_platt": {"log_loss": 0.6290954136, "brier": 0.2194122120, "auc": 0.6803314501, "ece": 0.0327367213},
+    "rolling366_platt": {"log_loss": 0.6355091817, "brier": 0.2223556508, "auc": 0.6727532957, "ece": 0.0246833800},
+    "block_platt": {"log_loss": 0.6513426959, "brier": 0.2296670512, "auc": 0.6548399247, "ece": 0.0689576355}
+  },
+  "within_window_ranking": {
+    "expanding_platt": {"all_folds_auc_unchanged": true, "all_folds_exact_order": true, "all_folds_spearman": 1.0},
+    "rolling366_platt": {"all_folds_auc_unchanged": true, "all_folds_exact_order": true, "all_folds_spearman": 1.0},
+    "block_platt": {"all_folds_auc_unchanged": true, "all_folds_exact_order": true, "all_folds_spearman": 1.0}
+  },
+  "future_holdout": {
+    "raw_o0": {"log_loss": 0.6669339724, "brier": 0.2367491044, "auc": 0.6602098467, "ece": 0.1448523224},
+    "expanding_platt": {"log_loss": 0.6665824870, "brier": 0.2370204358, "auc": 0.6602098467, "ece": 0.1073830856},
+    "rolling366_platt": {"log_loss": 0.6709193028, "brier": 0.2391969116, "auc": 0.6602098467, "ece": 0.0948870795}
+  },
+  "interpretation": {
+    "ranking_requirement": "PASS within every chronological evaluation window for every tested monotonic Platt method",
+    "probability_quality_requirement": "NO clean pass: no adaptive method improves log loss, Brier, and ECE simultaneously over raw O0 in the rolling-origin aggregate",
+    "future_holdout": "Expanding Platt slightly improves log loss and ECE but worsens Brier; rolling-366 improves ECE but worsens log loss and Brier",
+    "decision": "Do not promote an adaptive-calibration candidate as a production model and do not create O14 from this diagnostic alone",
+    "next_question": "The remaining weakness is more consistent with discrimination/feature relationship drift than with a standalone calibration problem. Preserve O0 and investigate feature-level temporal relationship stability rather than adding another calibration heuristic."
+  }
+}
