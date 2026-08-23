@@ -4,9 +4,11 @@
   "source_repository": "pixeldoumh-spec/Cricedge",
   "source_repository_role": "mistaken_private_archive; preserved as source evidence",
   "recovery_branch": "recovery/odi-from-cricedge",
-  "public_main_restored_to": "cce5a6ba6d4989b8a6b1804002537754400f4e64",
+  "public_main_restored_to": "7068d6f66ec8c77a7e620c53285eadf3027b9051",
+  "recovery_merge_commit": "8f68148d12729cb106b8f1e86c7be7cf627076d5",
   "locked_corpus_sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
   "decisive_population": 2440,
+  "recovery_scope": "ODI O0-O12 implementation and recovered ODI model documentation; public production history before recovery merge is preserved.",
   "source_odi_commit_chain": {
     "O0_corpus_contract": "c115b453f7efc088372a8e7f68e770ff90c43d7e",
     "O0_baseline_contract": "a82c5e08515cee80bc180823ee1e65b7222040a0",
@@ -34,7 +36,6 @@
     "O5_contract": "76466d494a2361bf6c8caadd78714e9bc98f9998",
     "O5_engine": "7c0ccda6c624b166e775b6bc6c904ea7e9eb3ab2",
     "O5_tests": "835ab2a28c51cc7f90302c256d01ff1617176315",
-    "O5_report": "e34bc2e2fb7355bb72cd7b...",
     "O6_engine": "a352033c9c8aea8f2d4c0175adb5ddb0f3ef7a9e",
     "O6_tests": "84c4107dad88bd69978cdb2cf9bd595def215785",
     "O6_report": "6180dce472e6de7e82f989ef435c476f50f97f7b",
@@ -49,7 +50,7 @@
     "O10_contract": "0dad32d7f61fad1760db6f045453e2eef54698a9",
     "O10_model": "832d09a9f0f4ff2c8678bf0dfe2179a620aa81d8",
     "O10_tests": "d30c039c91b5ec26a5d18576fc4952675fe45ca5",
-    "O10_report": "729821d1922cb047ede27d18a3dee089c4a1a6fb",
+    "O10_report": "729821d1922cb047ede27d18a3dee089c4a6a6fb",
     "O11_contract": "ae7a2cb12b17b2aed9273b49e3492f49fc5035e1",
     "O11_engine": "c6497f6c4954808a70bc2dccae9ef017014a6fe7",
     "O11_tests": "2e75cf647a121185bebda6053652189d086cec07",
@@ -58,6 +59,6 @@
     "O12_engine": "751d16be677becd93105661791befb87a2f3d57c",
     "O12_tests": "01ae3c3df77b9550cabdfc05ec5440d296b034a4"
   },
-  "status": "recovery_in_progress_on_dedicated_branch",
-  "rules": ["Do not write ODI recovery artifacts to public main until branch verification is complete.", "Do not delete the private source archive.", "O0 remains frozen."]
+  "status": "recovered_to_public_main",
+  "rules": ["Canonical ODI work is now Cricedge00001.","Do not write ODI recovery artifacts to the private source archive.","Do not delete the private source archive; it remains the provenance archive.","O0 remains frozen."]
 }
