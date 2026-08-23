@@ -14,7 +14,7 @@
   "controlled_change": {
     "type": "time_varying_logistic_coefficients",
     "base_features": "all 13 frozen O0 features",
-    "time_variable": "chronological position t normalized to [0,1] using training data only",
+    "time_variable": "training-anchored chronological position t = (row_index - first_train_index) / (last_train_index - first_train_index); future rows may extrapolate above 1",
     "augmentation": "for each O0 feature x_j, add x_j * t",
     "model": "StandardScaler + LogisticRegression(max_iter=2000)",
     "main_effects": "unchanged O0 feature columns",
@@ -29,7 +29,7 @@
     "O0 remains frozen as the control",
     "all O13 features must be computable before the current match",
     "current-match outcome and innings are unavailable to features",
-    "time normalization is fit from the training chronology only",
+    "time anchor is derived from training chronology only",
     "no test-period fitting or tuning",
     "calibration is validation-only using the canonical raw/Platt/isotonic selector",
     "no new hyperparameter search is permitted",
