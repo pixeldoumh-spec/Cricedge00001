@@ -1,0 +1,33 @@
+{
+  "experiment": "ODI_O14",
+  "status": "hypothesis_frozen_not_evaluated",
+  "control": "ODI_O0",
+  "hypothesis": "O0 plus chronological interactions for exactly three validated symmetric signed components",
+  "components": [
+    "team_a_recent_win_rate - team_b_recent_win_rate",
+    "team_a_runs_conceded_per_ball - team_b_runs_conceded_per_ball",
+    "team_a_defend_win_rate - team_b_defend_win_rate"
+  ],
+  "time_interaction": "component * normalized_chronological_time",
+  "normalization": "training-prefix-only",
+  "forbidden": [
+    "uniform half-life decay",
+    "history-depth interaction",
+    "time interactions for other O0 features",
+    "additional match-level features",
+    "post-hoc test tuning",
+    "future-holdout-driven selection"
+  ],
+  "primary_protocol": {
+    "train": "0:1708",
+    "validation": "1708:2074",
+    "untouched_test": "2074:2440"
+  },
+  "rolling_origin_train_ends": [1037,1244,1451,1658,1865],
+  "future_holdout": "train 0:1586; validation 1586:1952; future 1952:2074",
+  "primary_metric": "log_loss",
+  "secondary_metrics": ["brier", "auc", "ece", "accuracy"],
+  "promotion_rule": "No promotion unless untouched-test log loss improves versus O0 without material future-holdout regression; secondary metrics and rolling-origin stability must be reported.",
+  "calibration": "existing validation-only calibration protocol may be reported, but is not part of the O14 feature hypothesis",
+  "test_tuning": false
+}
