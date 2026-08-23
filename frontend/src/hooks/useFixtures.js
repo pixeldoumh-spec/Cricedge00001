@@ -7,8 +7,13 @@ export function useFixtures(format = "ALL") {
     queryFn: async () => {
       const config = format === "ALL" ? undefined : { params: { format } };
       const response = await api.get("/fixtures", config);
+      if (!Array.isArray(response.data)) {
+        throw new Error("Invalid fixture response from CricEdge API.");
+      }
       return response.data;
     },
+    staleTime: 5 * 60 * 1000,
+    retry: 2,
   });
 }
 
@@ -17,7 +22,12 @@ export function useFixtureFormats() {
     queryKey: ["fixture-formats"],
     queryFn: async () => {
       const response = await api.get("/fixtures/formats");
+      if (!response.data || !Array.isArray(response.data.formats)) {
+        throw new Error("Invalid format response from CricEdge API.");
+      }
       return response.data;
     },
+    staleTime: 10 * 60 * 1000,
+    retry: 2,
   });
 }
