@@ -1,0 +1,53 @@
+{
+  "model": "men_odi_o10",
+  "status": "executed_partial_reconciliation",
+  "corpus": {
+    "path": "odis_male_json.zip",
+    "sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
+    "archive_json": 2569,
+    "decisive_rows": 2440
+  },
+  "source": {
+    "runner_path": "backend/scripts/run_odi_o10_repro.py",
+    "runner_blob_sha": "35ad47ce943a23ebc87c1196a17c5cca3fc4c422",
+    "o0_corpus_blob_sha": "c0944275f897af3a928a3485f274c82dc206543e",
+    "o0_features_blob_sha": "a5e5741ad223f73bcbcaa49ddadde4cfbeb88e19",
+    "o10_model_blob_sha": "0722dbeb3fcfda4f881d259412b7d596f7a7e414",
+    "contract_blob_sha": "614a663f62d2671e0181d4959159d65ecb7b9468"
+  },
+  "result_artifact": {
+    "path": "ODI_O10_REPRODUCED_RESULT.json",
+    "sha256": "7996bac4cc3234964b7aba2b177408f0ea2884f6eec7ec145766508c208c4263"
+  },
+  "preserved_report": {
+    "path": "docs/model/ODI_O10_EVALUATION_REPORT.json",
+    "blob_sha": "5138a103e6eba2f6f848ee7609157ccbc2557fe5"
+  },
+  "reconciliation": {
+    "selected_C": {"reproduced": 0.25, "reported": 0.25, "status": "MATCH"},
+    "baseline_test_o10": {
+      "accuracy": {"reproduced": 0.5355191256830601, "reported": 0.5355191257},
+      "log_loss": {"reproduced": 0.6819156940670043, "reported": 0.6819156941},
+      "brier": {"reproduced": 0.24471748670135438, "reported": 0.2447174867},
+      "auc": {"reproduced": 0.6267183803048908, "reported": 0.6267183803},
+      "ece": {"reproduced": 0.08992832013949018, "reported": 0.0899283201},
+      "status": "MATCH_TO_REPORTED_PRECISION"
+    },
+    "validation_candidate_C": "MATCH_TO_REPORTED_PRECISION",
+    "future_holdout_calibrated": "MATCH_TO_REPORTED_PRECISION",
+    "future_holdout_raw_log_loss": "MATCH_TO_REPORTED_PRECISION",
+    "rolling_origin": {
+      "status": "MISMATCH",
+      "reported_deltas": [0.0033035275, -0.0068924230, 0.0035428722, -0.0409126984, 0.0001388158],
+      "reproduced_deltas": [-0.000938049501616578, -0.002305197442138196, -0.0025387434888211047, -0.024631510857290984, -0.00011788166432280534],
+      "note": "The committed runner applies per-fold validation C selection and does not reproduce the preserved rolling-origin deltas. The O10 contract only says to reuse frozen O0 rolling windows; the historical fold-level selection procedure is not encoded in the runner."
+    },
+    "legacy_feature_matrix_fingerprint": {
+      "status": "NOT_RECONCILED",
+      "reported": "a25b53a3dc580960e56a597ccbf0ab2b02802d916ba40d1537ac25102b57fee8",
+      "note": "The preserved report claims fingerprint reproduction, but the historical fingerprint serialization algorithm is not documented."
+    }
+  },
+  "decision": "O10 remains rejected; independent reproduction confirms main split selection and metrics plus future-holdout metrics, but rolling-origin provenance is not fully reconciled.",
+  "next_action": "Do not mark O10 fully GREEN. Reconstruct the exact historical rolling-origin evaluation procedure before final provenance closure."
+}
