@@ -1,0 +1,15 @@
+{
+  "model": "men_odi_o10",
+  "control": "men_odi_o0",
+  "status": "rejected_keep_o0_frozen",
+  "corpus": {"sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c", "population_n": 2569, "decisive_n": 2440, "ties": 27, "no_results": 102, "chronology_verified": true},
+  "feature_matrix": {"source": "frozen O0", "feature_count": 13, "matrix_sha256": "a25b53a3dc580960e56a597ccbf0ab2b02802d916ba40d1537ac25102b57fee8", "o0_fingerprint_reproduced": true, "current_match_leakage": false},
+  "contract": {"candidate_C": [0.25, 0.5, 1.0, 2.0, 4.0], "control_C": 1.0, "selection": "validation_only_raw_log_loss"},
+  "baseline_test": {"o0": {"selected_C": 1.0, "calibration": "isotonic", "accuracy": 0.5409836066, "log_loss": 0.6749556551, "brier": 0.2412253816, "auc": 0.6364371500, "ece": 0.0817980728}, "o10": {"selected_C": 0.25, "calibration": "isotonic", "accuracy": 0.5355191257, "log_loss": 0.6819156941, "brier": 0.2447174867, "auc": 0.6267183803, "ece": 0.0899283201}},
+  "o10_validation_raw_log_loss_by_C": {"0.25": 0.6616525634, "0.5": 0.6696403083, "1.0": 0.6773569239, "2.0": 0.6834417273, "4.0": 0.6876476036},
+  "rolling_origin": {"folds": 5, "o0_wins": 3, "o10_wins": 2, "o10_log_loss_delta_vs_o0": [0.0033035275,-0.0068924230,0.0035428722,-0.0409126984,0.0001388158]},
+  "regime": {"o0_older_log_loss": 0.6549910591, "o10_older_log_loss": 0.6677761617, "o0_newer_log_loss": 0.6949202511, "o10_newer_log_loss": 0.6960552263},
+  "future_holdout": {"protocol": "train 0:1586, validation 1586:1952, future holdout 1952:2074", "o0": {"calibration":"isotonic","log_loss":0.6742973212,"brier":0.2410391413,"auc":0.6513317191,"ece":0.1129682964}, "o10": {"calibration":"isotonic","log_loss":0.9709976173,"brier":0.2500841976,"auc":0.6454129674,"ece":0.0998919350}, "raw": {"o0_log_loss":0.6669339724,"o10_log_loss":0.6594580991}},
+  "decision": {"promote_o10": false, "reason": "O10 loses the untouched baseline test on log loss, Brier, AUC and ECE; wins only 2 of 5 rolling-origin folds; loses both frozen test regimes; and its validation-selected C=0.25 produces a severe future-holdout calibrated log-loss failure. The modest raw future improvement does not survive the required validation-only calibration protocol.", "keep_o0_frozen": true, "next_direction": "Do not continue tuning LogisticRegression C. The controlled model-redesign hypothesis is rejected; any next ODI experiment should target a separately justified structural/modeling hypothesis."},
+  "verification": {"semantic_training_tests": "PASS", "o0_fingerprint_reproduction": "PASS", "baseline_test_untouched": true}
+}
