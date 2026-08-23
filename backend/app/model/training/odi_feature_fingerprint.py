@@ -14,10 +14,15 @@ ODI_LEGACY_FEATURE_FINGERPRINT_EXPECTED = "a64c5b01d338b08e018c92bf34c30355e41a3
 
 
 def fingerprint_odi_legacy(rows: Sequence[Mapping[str, Any]]) -> str:
-    """Reconstructed legacy ODI fingerprint.
+    """Compute the reconstructed historical fingerprint candidate.
 
     Serialization: complete supervised rows, JSON encoded with sorted keys,
     compact separators, UTF-8, NaN disallowed; then SHA-256.
+
+    Important: the original historical source implementation was not recovered
+    from Git history. This function is therefore a reproducible candidate, not
+    proof of historical source attribution. Its output must not be asserted to
+    equal the preserved legacy value without an explicit comparison.
     """
     payload = json.dumps(
         list(rows), separators=(",", ":"), sort_keys=True, allow_nan=False
@@ -26,10 +31,10 @@ def fingerprint_odi_legacy(rows: Sequence[Mapping[str, Any]]) -> str:
 
 
 def fingerprint_odi_canonical(rows: Sequence[Mapping[str, Any]]) -> str:
-    """Canonical ODI provenance fingerprint.
+    """Compute the frozen canonical ODI provenance fingerprint.
 
-    The current canonical contract intentionally preserves the exact bytes of
-    the reconstructed legacy fingerprint. It is an ODI provenance contract,
-    not a model version.
+    The canonical ODI contract currently uses the same deterministic byte
+    serialization as the reconstructed historical candidate, but it is a
+    separately named provenance contract and makes no historical attribution.
     """
     return fingerprint_odi_legacy(rows)
