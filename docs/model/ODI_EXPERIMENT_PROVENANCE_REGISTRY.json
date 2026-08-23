@@ -1,0 +1,31 @@
+{
+  "schema_version": "odi_provenance_registry_v1",
+  "corpus_contract": "docs/model/ODI_CORPUS_LOCK.json",
+  "locked_corpus_sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
+  "chronological_fingerprint_sha256": "2b04bca99fabde61f33f7dc9d265b797a58a36f7fb1725a2671186e764da2f64",
+  "experiments": {
+    "O0": {
+      "hypothesis": "canonical frozen 13-feature ODI baseline",
+      "runner": "backend/app/model/training/odi_o0_baseline.py",
+      "protocol": "docs/model/ODI_O0_BASELINE_REPORT.json",
+      "result": "docs/model/ODI_O0_BASELINE_REPORT.json",
+      "provenance_status": "legacy_result_recorded_runner_not_yet_reconstructed"
+    },
+    "O12": {
+      "hypothesis": "O0 strength x log1p(minimum pre-match decisive history)",
+      "runner": "backend/app/model/training/odi_o12_features.py",
+      "protocol": "docs/model/ODI_O12_CONTEXT_INTERACTION_CONTROLLED_CHANGE.json",
+      "result": "docs/model/ODI_O12_EVALUATION_REPORT.json",
+      "provenance_status": "legacy_result_recorded_runner_not_yet_reconstructed"
+    },
+    "O14": {
+      "hypothesis": "O0 plus chronological interactions for exactly three validated symmetric signed components",
+      "runner": "backend/app/model/training/odi_o14_model.py",
+      "protocol": "docs/model/ODI_O14_EVALUATION_PROTOCOL.json",
+      "result": "docs/model/ODI_O14_EVALUATION_REPORT.json",
+      "provenance_status": "legacy_result_recorded_runner_not_yet_reconstructed"
+    }
+  },
+  "provenance_rule": "A result is authoritative as a reproducible experiment only when an executable runner completes successfully against the locked corpus and emits a result artifact plus a generated provenance manifest containing repository revision, corpus hash, source hashes, runner command, protocol, and result hash.",
+  "migration_policy": "Do not rewrite or silently replace legacy result artifacts. Reconstruct deterministic runners and emit new reproducible manifests; compare regenerated results with the legacy artifact before upgrading provenance_status."
+}
