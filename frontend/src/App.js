@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Overview from "@/pages/Overview";
 import FixtureDetail from "@/pages/FixtureDetail";
 import Portfolio from "@/pages/Portfolio";
@@ -12,22 +12,14 @@ class AppErrorBoundary extends React.Component {
   }
 
   static getDerivedStateFromError(error) {
-    return {
-      hasError: true,
-      message: error?.message || "An unexpected application error occurred.",
-    };
+    return { hasError: true, message: error?.message || "An unexpected application error occurred." };
   }
 
   componentDidCatch(error, info) {
-    // Keep the user-facing message safe while retaining diagnostics in development.
-    if (process.env.NODE_ENV !== "production") {
-      console.error("CricEdge render error", error, info);
-    }
+    if (process.env.NODE_ENV !== "production") console.error("CricEdge render error", error, info);
   }
 
-  handleRetry = () => {
-    this.setState({ hasError: false, message: "" });
-  };
+  handleRetry = () => this.setState({ hasError: false, message: "" });
 
   render() {
     if (this.state.hasError) {
@@ -44,7 +36,7 @@ class AppErrorBoundary extends React.Component {
             <div><span className="eyebrow">NEXT STEP</span><b>{this.state.message}</b></div>
             <div>
               <button type="button" className="outline-btn" onClick={this.handleRetry}>TRY AGAIN</button>
-              <Link className="outline-btn" to="/">HOME</Link>
+              <a className="outline-btn" href="/">HOME</a>
             </div>
           </div>
         </main>
