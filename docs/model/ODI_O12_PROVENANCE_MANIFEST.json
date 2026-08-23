@@ -1,0 +1,28 @@
+{
+  "experiment": "O12",
+  "status": "reconstructed_and_reconciled",
+  "locked_corpus_sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
+  "archive_json_files": 2569,
+  "decisive_rows": 2440,
+  "feature_fingerprint": "ODI canonical feature fingerprint",
+  "legacy_o0_fingerprint_value": "a64c5b01d338b08e018c92bf34c30355e41a380ba0209f190fad457bccc60d42",
+  "protocol": "docs/model/ODI_O12_CONTEXT_INTERACTION_CONTROLLED_CHANGE.json",
+  "runner": "backend/scripts/run_odi_o12_repro.py",
+  "runner_commit": "80b1ee6991fd7b63ddb2f4ba436fdcb32838ee7e",
+  "source_git_blobs": {
+    "backend/app/model/training/odi_o0_corpus.py": "c0944275f897af3a928a3485f274c82dc206543e",
+    "backend/app/model/training/odi_o0_features.py": "a5e5741ad223f73bcbcaa49ddadde4cfbeb88e19",
+    "backend/app/model/training/odi_o0_baseline.py": "6869e358f6fe486f3f27e73408f42df886eed493",
+    "backend/app/model/training/odi_o12_features.py": "93ae550eabba424f79dfd8e746a8b1b0fa536ed8"
+  },
+  "result_artifact": "docs/model/ODI_O12_REPRODUCED_REPORT.json",
+  "result_commit": "6c39e0fedefbb149cba2580af8d3731cdb752861",
+  "reconciliation": {
+    "untouched_test": "matches legacy O12 report to reported precision",
+    "history_depth": "matches legacy O12 report to reported precision",
+    "rolling_origin": "4 O12 raw wins vs 1 O0 raw win, matching legacy report",
+    "future_holdout": "matches legacy O12 report to reported precision",
+    "decision": "REJECTED — keep O0 frozen"
+  },
+  "note": "This is an independently executed reconstruction from the exact locked corpus. It does not claim that the historical O12 runner source was recovered; it establishes a reproducible replacement runner whose outputs reconcile with the preserved legacy result artifact."
+}
