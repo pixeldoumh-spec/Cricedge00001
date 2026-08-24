@@ -29,8 +29,7 @@ class BoundedMovementConfig:
     use_magnitude: bool
 
 
-# Predeclared, deliberately small grid. These are diagnostics, not a search
-a# over arbitrary hyperparameters.
+# Predeclared, deliberately small grid. These are diagnostics, not a search over arbitrary hyperparameters.
 CONFIGS: tuple[BoundedMovementConfig, ...] = (
     BoundedMovementConfig(5, 100.0, True, False),
     BoundedMovementConfig(10, 100.0, True, False),
@@ -56,22 +55,8 @@ def signed_magnitude(delta: float, cap_elo: float) -> tuple[float, float]:
     return value, abs(value)
 
 
-def recent_rate(
-    history: Sequence[Mapping[str, Any]],
-    team: str,
-    horizon_matches: int,
-    current_fast_elo: float,
-) -> float:
-    """Return fast-Elo movement per completed match over the prior H matches.
-
-    ``history`` must contain only completed matches before the current match and
-    must be ordered chronologically. Each row must provide ``team``, ``fast_elo``
-    as the post-match state. The baseline is the team's fast Elo state
-    immediately after the H-th most recent completed match.
-
-    If fewer than H completed matches exist, the H-match rate is unobservable;
-    this function returns 0.0 by the explicit cold-start contract above.
-    """
+def recent_rate(history: Sequence[Mapping[str, Any]], team: str, horizon_matches: int, current_fast_elo: float) -> float:
+    """Return fast-Elo movement per completed match over the prior H matches."""
     if horizon_matches <= 0:
         raise ValueError("horizon_matches must be positive")
     team_rows = [r for r in history if r.get("team") == team]
@@ -81,16 +66,9 @@ def recent_rate(
     return (float(current_fast_elo) - baseline) / horizon_matches
 
 
-def bounded_recent_rate(
-    history: Sequence[Mapping[str, Any]],
-    team: str,
-    current_fast_elo: float,
-    horizon_matches: int,
-    cap_elo: float,
-) -> float:
+def bounded_recent_rate(history: Sequence[Mapping[str, Any]], team: str, current_fast_elo: float, horizon_matches: int, cap_elo: float) -> float:
     """Compute the explicit bounded recent fast-Elo movement state."""
-    rate = recent_rate(history, team, horizon_matches, current_fast_elo)
-    return bounded_tanh(rate, cap_elo)
+    return bounded_tanh(recent_rate(history, team, horizon_matches, current_fast_elo), cap_elo)
 
 
 def protocol() -> dict:
@@ -105,8 +83,7 @@ def protocol() -> dict:
         "baseline": "post-match fast Elo state after the H-th most recent completed team match",
         "cold_start": "0.0 when fewer than H completed team matches exist",
         "configs": [
-            {"horizon_matches": c.horizon_matches, "cap_elo": c.cap_elo,
-             "use_sign": c.use_sign, "use_magnitude": c.use_magnitude}
+            {"horizon_matches": c.horizon_matches, "cap_elo": c.cap_elo, "use_sign": c.use_sign, "use_magnitude": c.use_magnitude}
             for c in CONFIGS
         ],
     }
