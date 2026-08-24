@@ -26,6 +26,16 @@ class NormalizedDelivery:
     extras: int
     total_runs: int
     wicket: bool = False
+    wides: int = 0
+    no_balls: int = 0
+    byes: int = 0
+    leg_byes: int = 0
+    penalty_runs: int = 0
+
+    @property
+    def legal_ball(self) -> bool:
+        """Whether this delivery consumes a legal ball under T20 scoring rules."""
+        return self.wides == 0 and self.no_balls == 0
 
 
 @dataclass(frozen=True)
@@ -100,6 +110,11 @@ def normalize_match(match_id: str, raw: dict[str, Any]) -> CanonicalMatch:
                         extras=int(sum(extras.values())) if extras else 0,
                         total_runs=int(runs.get("total", 0)),
                         wicket=bool(delivery.get("wickets")),
+                        wides=int(extras.get("wides", 0)),
+                        no_balls=int(extras.get("noballs", 0)),
+                        byes=int(extras.get("byes", 0)),
+                        leg_byes=int(extras.get("legbyes", 0)),
+                        penalty_runs=int(extras.get("penalty", 0)),
                     )
                 )
 
