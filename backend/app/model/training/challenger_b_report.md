@@ -42,21 +42,26 @@ Challenger B improved log loss, Brier and AUC in **all five** rolling origins. E
 
 Challenger B improved log loss, Brier and AUC in **all five** rolling origins and ECE in 4/5. The genuine future holdout improved log loss (0.54167 → 0.53263), Brier (0.18414 → 0.18004), AUC (0.79722 → 0.80945), and ECE (0.08867 → 0.06758).
 
+## Independent fixed-K confirmation
+
+After validation selection, the selected K was fixed and evaluated on a later, untouched 10% future holdout. No K search was performed on this confirmation period.
+
+- Men's: K=80; 342-match holdout from 2026-02-25 through 2026-08-21. Accuracy 0.71930, log loss 0.57055, Brier 0.19203, AUC 0.78392, ECE 0.05909.
+- Women's: K=160; 207-match holdout from 2026-04-11 through 2026-08-11. Accuracy 0.72464, log loss 0.53263, Brier 0.18004, AUC 0.80945, ECE 0.06758.
+
+These are the same independent future-holdout values reported above, but the confirmation is explicitly run with K fixed rather than re-selected.
+
 ## Interpretation
 
 The evidence strongly supports the hypothesis that the fixed K=20 Elo representation is too slow to adapt to changing team strength.
 
-The effect is not isolated to one test window: the directional gains persist across the rolling-origin evaluation and future holdout.
-
-However, the female frozen test has a calibration tradeoff: the strength challenger improves accuracy, log loss, Brier and AUC but worsens ECE when compared under W0's production-compatible raw-probability policy.
-
-Therefore Challenger B is **not a blanket replacement of both references yet**.
+The effect is not isolated to one test window: the directional gains persist across the rolling-origin evaluation and independent future holdout.
 
 ### Current decision
 
-- **Men's V0:** Challenger B is a strong replacement candidate. Before changing the production reference, perform one independent confirmation with K fixed at the validation-selected value (80), rather than reselecting K, so the final decision is not dependent on a hyperparameter-selection artifact.
-- **Women's W0:** Do not replace W0 yet. The strength representation is promising, but calibration must be investigated as a separate, explicitly controlled follow-up rather than folded into Challenger B.
-- **V0/W0 artifacts:** unchanged.
+- **Men's V0:** Challenger B is now a **strong replacement candidate**. It improves the frozen reference on accuracy, log loss, Brier, AUC and ECE, and the fixed-K future holdout confirms gains in log loss, Brier and AUC. The current V0 artifacts remain unchanged; replacement requires the normal artifact rebuild + provenance verification step rather than an additional model experiment.
+- **Women's W0:** Challenger B is a **strong modeling candidate but not yet a production replacement**. It improves accuracy, log loss, Brier and AUC on the frozen test and is favorable on the future holdout, but its frozen-test ECE is worse. A separate calibration challenger is therefore warranted; calibration is not folded into B because that would confound the strength hypothesis.
+- **Overall:** Do not replace both references with one blanket decision. Treat V0 and W0 independently.
 
 ## Provenance
 
