@@ -1,0 +1,21 @@
+{
+  "experiment": "T20 Challenger B calibration/reconciliation",
+  "status": "completed_diagnostic_only",
+  "gender": "female",
+  "selected_k": 160.0,
+  "corpus_sha256": "e868d332681b38df6f39376e6d7daf14143c57fc775abbf1cc830d8bb80dd997",
+  "split": {"train": 1446, "validation": 310, "test": 310},
+  "frozen_test": {
+    "raw": {"accuracy": 0.7451612903225806, "log_loss": 0.5218116044186533, "brier_score": 0.17413734648554866, "auc": 0.8233413269384492, "ece_10": 0.06988704552878558},
+    "calibrated": {"accuracy": 0.7483870967741936, "log_loss": 0.5130090465484526, "brier_score": 0.17114570704534515, "auc": 0.8233413269384492, "ece_10": 0.04866040031487214}
+  },
+  "future_holdout_171": {
+    "train": 1585, "validation": 310, "holdout": 171,
+    "raw": {"accuracy": 0.7719298245614035, "log_loss": 0.5015058212113207, "brier_score": 0.1657216247232675, "auc": 0.8399014778325123, "ece_10": 0.07739554112922518},
+    "calibrated": {"accuracy": 0.7426900584795322, "log_loss": 0.5134076435989938, "brier_score": 0.1712775643685952, "auc": 0.8399014778325123, "ece_10": 0.10390422591480278}
+  },
+  "rolling_origin_summary": {"windows": 5, "calibrated_log_loss_improved": 5, "calibrated_brier_improved": 5, "calibrated_ece_improved": 3, "calibrated_accuracy_improved": 2, "auc_changed": 0},
+  "decision": "reject_calibration_as_production_fix",
+  "reason": "Platt calibration improves the frozen test and several rolling windows, but materially worsens the future 171-match holdout across accuracy, log loss, Brier and ECE, so it is not a stable production calibration repair.",
+  "v0_w0_modified": false
+}
