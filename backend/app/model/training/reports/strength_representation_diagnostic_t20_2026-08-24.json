@@ -1,0 +1,113 @@
+{
+  "experiment": "T20 strength representation diagnostic",
+  "status": "completed_diagnostic_only",
+  "date": "2026-08-24",
+  "corpus_sha256": "e868d332681b38df6f39376e6d7daf14143c57fc775abbf1cc830d8bb80dd997",
+  "eligible_matches": {"male": 3411, "female": 2066},
+  "protocol": {
+    "k_grid": [20, 40, 60, 80, 120, 160, 240, 320],
+    "rolling_origins": "train boundaries 50%,55%,60%,65%,70%; next 10% validation; following 10% test",
+    "selection": "validation log loss only",
+    "main_split": "70% train, 15% validation, 15% test",
+    "test_or_future_used_for_selection": false
+  },
+  "male": {
+    "main_validation": [
+      {"k":80,"validation_log_loss":0.572677},
+      {"k":120,"validation_log_loss":0.573765},
+      {"k":60,"validation_log_loss":0.573959},
+      {"k":160,"validation_log_loss":0.576809},
+      {"k":40,"validation_log_loss":0.577696},
+      {"k":240,"validation_log_loss":0.583382},
+      {"k":20,"validation_log_loss":0.585904},
+      {"k":320,"validation_log_loss":0.588571}
+    ],
+    "rolling_origin_winners": [
+      {"origin":1,"k":160,"validation_log_loss":0.621112},
+      {"origin":2,"k":160,"validation_log_loss":0.624440},
+      {"origin":3,"k":160,"validation_log_loss":0.581528},
+      {"origin":4,"k":120,"validation_log_loss":0.574669},
+      {"origin":5,"k":120,"validation_log_loss":0.596984}
+    ],
+    "winner_counts":{"120":2,"160":3},
+    "fixed_k80_vs_k20_test_by_origin":[
+      {"origin":1,"k20_log_loss":0.609124,"k80_log_loss":0.587020,"log_loss_delta":-0.022104,"k20_brier":0.206531,"k80_brier":0.198125,"k20_auc":0.737994,"k80_auc":0.763761},
+      {"origin":2,"k20_log_loss":0.600869,"k80_log_loss":0.579864,"log_loss_delta":-0.021005,"k20_brier":0.203663,"k80_brier":0.195770,"k20_auc":0.754558,"k80_auc":0.774338},
+      {"origin":3,"k20_log_loss":0.613765,"k80_log_loss":0.601521,"log_loss_delta":-0.012244,"k20_brier":0.208963,"k80_brier":0.204561,"k20_auc":0.736960,"k80_auc":0.747144},
+      {"origin":4,"k20_log_loss":0.579647,"k80_log_loss":0.565919,"log_loss_delta":-0.013728,"k20_brier":0.194313,"k80_brier":0.189623,"k20_auc":0.785985,"k80_auc":0.794262},
+      {"origin":5,"k20_log_loss":0.556365,"k80_log_loss":0.535231,"log_loss_delta":-0.021134,"k20_brier":0.188773,"k80_brier":0.181663,"k20_auc":0.812242,"k80_auc":0.828310}
+    ],
+    "elo_ablation_validation_by_origin":[
+      {"origin":1,"full_log_loss":0.625163,"without_elo_log_loss":0.653317,"elo_log_loss_gain":0.028154,"elo_auc_gain":0.033582},
+      {"origin":2,"full_log_loss":0.630753,"without_elo_log_loss":0.658615,"elo_log_loss_gain":0.027863,"elo_auc_gain":0.045961},
+      {"origin":3,"full_log_loss":0.586549,"without_elo_log_loss":0.632744,"elo_log_loss_gain":0.046195,"elo_auc_gain":0.072004},
+      {"origin":4,"full_log_loss":0.576303,"without_elo_log_loss":0.625095,"elo_log_loss_gain":0.048793,"elo_auc_gain":0.057860},
+      {"origin":5,"full_log_loss":0.597533,"without_elo_log_loss":0.640340,"elo_log_loss_gain":0.042807,"elo_auc_gain":0.058870}
+    ],
+    "main_test_elo_ablation": {
+      "full_k80": {"log_loss":0.566847,"brier":0.191949,"auc":0.786883,"accuracy":0.723633},
+      "without_elo": {"log_loss":0.618743,"brier":0.214982,"auc":0.727880,"accuracy":0.656250},
+      "log_loss_gain":0.051897,
+      "auc_gain":0.059004
+    },
+    "elo_correlation": {"team_elo":{"team_elo":1.0,"opponent_elo":0.459930,"elo_difference":0.527979},"opponent_elo":{"team_elo":0.459930,"opponent_elo":1.0,"elo_difference":-0.511269},"elo_difference":{"team_elo":0.527979,"opponent_elo":-0.511269,"elo_difference":1.0}},
+    "late_era_elo_difference_std_k20_vs_k80":{"2022":[84.796,168.023],"2023":[95.073,180.081],"2024":[84.456,181.218],"2025":[101.117,213.942],"2026":[105.344,211.053]}
+  },
+  "female": {
+    "main_validation": [
+      {"k":160,"validation_log_loss":0.509453},
+      {"k":120,"validation_log_loss":0.510670},
+      {"k":240,"validation_log_loss":0.511508},
+      {"k":320,"validation_log_loss":0.515266},
+      {"k":80,"validation_log_loss":0.515638},
+      {"k":60,"validation_log_loss":0.520595},
+      {"k":40,"validation_log_loss":0.527842},
+      {"k":20,"validation_log_loss":0.537023}
+    ],
+    "rolling_origin_winners":[
+      {"origin":1,"k":160,"validation_log_loss":0.499145},
+      {"origin":2,"k":120,"validation_log_loss":0.524575},
+      {"origin":3,"k":80,"validation_log_loss":0.520374},
+      {"origin":4,"k":160,"validation_log_loss":0.550260},
+      {"origin":5,"k":240,"validation_log_loss":0.479706}
+    ],
+    "winner_counts":{"80":1,"120":1,"160":2,"240":1},
+    "fixed_k160_vs_k20_test_by_origin":[
+      {"origin":1,"k20_log_loss":0.532397,"k160_log_loss":0.529353,"log_loss_delta":-0.003044,"k20_brier":0.178866,"k160_brier":0.177571,"k20_auc":0.816365,"k160_auc":0.821927},
+      {"origin":2,"k20_log_loss":0.566841,"k160_log_loss":0.550059,"log_loss_delta":-0.016782,"k20_brier":0.193072,"k160_brier":0.186583,"k20_auc":0.781440,"k160_auc":0.793883},
+      {"origin":3,"k20_log_loss":0.522338,"k160_log_loss":0.488350,"log_loss_delta":-0.033988,"k20_brier":0.177329,"k160_brier":0.165263,"k20_auc":0.833238,"k160_auc":0.854215},
+      {"origin":4,"k20_log_loss":0.528371,"k160_log_loss":0.495462,"log_loss_delta":-0.032909,"k20_brier":0.178793,"k160_brier":0.167181,"k20_auc":0.826278,"k160_auc":0.849161},
+      {"origin":5,"k20_log_loss":0.557119,"k160_log_loss":0.532576,"log_loss_delta":-0.024543,"k20_brier":0.187686,"k160_brier":0.179188,"k20_auc":0.798706,"k160_auc":0.815995}
+    ],
+    "elo_ablation_validation_by_origin":[
+      {"origin":1,"full_log_loss":0.499145,"without_elo_log_loss":0.544606,"elo_log_loss_gain":0.045461,"elo_auc_gain":0.047858},
+      {"origin":2,"full_log_loss":0.524950,"without_elo_log_loss":0.567156,"elo_log_loss_gain":0.042207,"elo_auc_gain":0.044023},
+      {"origin":3,"full_log_loss":0.524358,"without_elo_log_loss":0.539716,"elo_log_loss_gain":0.015358,"elo_auc_gain":0.007636},
+      {"origin":4,"full_log_loss":0.550260,"without_elo_log_loss":0.565306,"elo_log_loss_gain":0.015046,"elo_auc_gain":0.007504},
+      {"origin":5,"full_log_loss":0.480503,"without_elo_log_loss":0.523451,"elo_log_loss_gain":0.042948,"elo_auc_gain":0.028138}
+    ],
+    "main_test_elo_ablation": {
+      "full_k160": {"log_loss":0.514976,"brier":0.170496,"auc":0.829484,"accuracy":0.753226},
+      "without_elo": {"log_loss":0.541160,"brier":0.181216,"auc":0.808174,"accuracy":0.714516},
+      "log_loss_gain":0.026184,
+      "auc_gain":0.021309
+    },
+    "elo_correlation": {"team_elo":{"team_elo":1.0,"opponent_elo":0.501147,"elo_difference":0.497242},"opponent_elo":{"team_elo":0.501147,"opponent_elo":1.0,"elo_difference":-0.501608},"elo_difference":{"team_elo":0.497242,"opponent_elo":-0.501608,"elo_difference":1.0}},
+    "late_era_elo_difference_std_k20_vs_k160":{"2022":[113.148,262.546],"2023":[106.658,241.536],"2024":[103.911,260.936],"2025":[90.345,313.179],"2026":[120.162,322.006]}
+  },
+  "reconciliation_note": "Current-source reconstruction reproduces the preserved raw male K=80 test metrics exactly (accuracy 0.7173489, log loss 0.5610395, Brier 0.1897584, AUC 0.7917946, ECE 0.0597996). The preserved Challenger B report labels the later calibrated values (0.5532063 log loss, 0.1867927 Brier, ECE 0.0457976) as challenger_test; the preserved male calibration report explicitly identifies those as calibrated and 0.5610395 as raw. This is an artifact-label inconsistency, not a corpus mismatch.",
+  "decision": {
+    "male": "K responsiveness is strongly supported. However, rolling-origin validation does not support one universal K: K160 wins 3/5 origins and K120 wins 2/5. Fixed K80 nevertheless beats K20 on log loss, Brier and AUC in all five rolling-origin test windows.",
+    "female": "K responsiveness is strongly supported, but the rolling-origin winners vary across 160,120,80,160,240. No single K dominates.",
+    "overall": "Do not create another arbitrary fixed-K model. The evidence supports moving from a scalar K toward a more principled time-varying or strength-state representation. V0/W0 remain unchanged."
+  },
+  "provenance": {
+    "normalizer_sha":"b7c440cd2ab5d4c2ed5f870fa1fd1e730ae1ff31",
+    "team_form_sha":"496339211d1f4ce0e018baad3b5561d88c2222f1",
+    "context_sha":"7c95aa0be8763160d738061dc3dc60aa8955501d",
+    "ball_strength_sha":"4e83b5f94c3d1d9a0e1f2d0efb4dbc0a45fa06b6",
+    "model_v0_sha":"09b0aedbdf109095bf7e1177f57378d702d2b88d",
+    "splits_sha":"bf6ad9a263bdc6d7885e732f0a7ede76d3846500",
+    "result_sha256":"a29cc811477b074c81a4bcfc529e493fcd001ce4cb357ceb11c66c0253bd7477"
+  }
+}
