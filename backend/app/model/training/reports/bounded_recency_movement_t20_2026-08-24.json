@@ -1,0 +1,62 @@
+{
+  "experiment": "T20 bounded recency movement diagnostic",
+  "status": "completed_diagnostic_only",
+  "date": "2026-08-24",
+  "corpus": {
+    "sha256": "e868d332681b38df6f39376e6d7daf14143c57fc775abbf1cc830d8bb80dd997",
+    "source": "uploaded t20s_json.zip",
+    "male_matches": 3411,
+    "female_matches": 2066
+  },
+  "definition": "rate_H=(fast_elo_t-fast_elo_t_minus_H)/H; bounded=tanh(rate_H/cap_elo)",
+  "cold_start": "0.0 when fewer than H completed team matches exist",
+  "representation": "slow K=20 team/opponent/difference plus bounded fast-strength movement for team/opponent/relative; magnitude configs additionally include absolute bounded movements",
+  "selection": "main chronological validation log loss only; frozen test and future holdout not used for selection",
+  "model": "StandardScaler + LogisticRegression(max_iter=2000)",
+  "non_strength_features_unchanged": true,
+  "calibration": false,
+  "protocol": {
+    "male_fast_k": 80,
+    "female_fast_k": 160,
+    "slow_k": 20,
+    "frozen_split": {"male": [2387, 511, 513], "female": [1446, 310, 310]},
+    "rolling_origins": [0.50, 0.55, 0.60, 0.65, 0.70],
+    "rolling_validation_fraction": 0.10,
+    "rolling_evaluation_fraction": 0.10,
+    "future_holdout": 171,
+    "future_validation": 310
+  },
+  "selected_config": {
+    "male": {"horizon_matches": 20, "cap_elo": 100, "magnitude": true},
+    "female": {"horizon_matches": 20, "cap_elo": 100, "magnitude": true}
+  },
+  "male": {
+    "validation": {"accuracy": 0.6947162426614482, "log_loss": 0.5837412417774296, "brier_score": 0.1990680569868355, "auc": 0.7738409174536981, "ece_10": 0.062027436151641094},
+    "frozen_test_bounded": {"accuracy": 0.6920077972709552, "log_loss": 0.590404280321131, "brier_score": 0.20183966598827263, "auc": 0.765953242331195, "ece_10": 0.05836506624517613},
+    "frozen_test_raw_b": {"accuracy": 0.7173489278752436, "log_loss": 0.561039522904864, "brier_score": 0.1897584391261568, "auc": 0.7917946067552366, "ece_10": 0.05979961220227563},
+    "rolling_origin_log_loss": {"raw_b": [0.5870200540694585, 0.5798638800666696, 0.6015209918823188, 0.5659189630728662, 0.535230651389627], "bounded": [0.6106626837248326, 0.5989417475652242, 0.6108501938442255, 0.5779227544249805, 0.5579561635177382]},
+    "future_holdout_171": {"raw_b": {"accuracy": 0.7543859649122807, "log_loss": 0.5550918127038161, "brier_score": 0.1847180469095772, "auc": 0.795423403672239, "ece_10": 0.09995125817309877}, "bounded": {"accuracy": 0.7251461988304093, "log_loss": 0.5849000511792818, "brier_score": 0.19625049856298554, "auc": 0.7777473280350781, "ece_10": 0.08868969930718773}}
+  },
+  "female": {
+    "validation": {"accuracy": 0.7411003236245954, "log_loss": 0.5347576606667748, "brier_score": 0.17801035292724432, "auc": 0.8178235443681667, "ece_10": 0.07833197546902108},
+    "frozen_test_bounded": {"accuracy": 0.7202572347266881, "log_loss": 0.5495320322343423, "brier_score": 0.18480693318424282, "auc": 0.8042606516290728, "ece_10": 0.07420262816921977},
+    "frozen_test_raw_b": {"accuracy": 0.7459807073954984, "log_loss": 0.5204633474473561, "brier_score": 0.1736079391502326, "auc": 0.8245614035087718, "ece_10": 0.06973699227030418},
+    "rolling_origin_log_loss": {"raw_b": [0.5293533469984978, 0.5500591620333035, 0.4883497466277436, 0.4954621105477562, 0.5325760511409716], "bounded": [0.5331387093091847, 0.5513228205523593, 0.5171237060424573, 0.5354135908135778, 0.5738206730851049]},
+    "future_holdout_171": {"raw_b": {"accuracy": 0.7719298245614035, "log_loss": 0.5015058212113207, "brier_score": 0.1657216247232675, "auc": 0.8399014778325123, "ece_10": 0.07739554112922518}, "bounded": {"accuracy": 0.7309941520467836, "log_loss": 0.5131420543951699, "brier_score": 0.17142700689633927, "auc": 0.8251231527093597, "ece_10": 0.08854304841987758}}
+  },
+  "decision": {
+    "male": "REJECT",
+    "female": "REJECT",
+    "promotion": false,
+    "reason": "Validation-selected bounded recency movement loses raw Challenger B on all five rolling-origin log-loss windows and on the independent 171-match future holdout for both populations."
+  },
+  "provenance": {
+    "parser_sha": "cf1132155b78a2804d9d8b966b9363e844aa49be",
+    "normalizer_sha": "b7c440cd2ab5d4c2ed5f870fa1fd1e730ae1ff31",
+    "model_v0_sha": "09b0aedbdf109095bf7e1177f57378d702d2b88d",
+    "challenger_b_sha": "3d58c5c1af22fbee5b33509e881a838829e3e49d",
+    "bounded_recency_commit": "87fea664e7becbcf64fc9f836510c55ad5490748"
+  },
+  "execution_note": "Numerical execution was performed locally against the uploaded corpus using a faithful reconstruction of the repository parser, normalizer, TeamFormEngine, ContextFeatureEngine, BallStrengthEngine, Challenger B estimator, and chronological split/rolling protocol. The GitHub connector cannot execute Python inside the repository runtime.",
+  "reference_reconciliation_note": "Men's reconstructed raw Challenger B frozen-test metrics reproduce the preserved raw Challenger B values. The preserved female report lists frozen-test raw log loss 0.5218116, while this canonical-source reconstruction produced 0.5204633; the discrepancy is recorded rather than silently reconciled. The independent future-holdout raw metrics reproduce the preserved female values."
+}
