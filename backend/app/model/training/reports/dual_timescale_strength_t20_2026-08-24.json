@@ -2,11 +2,7 @@
   "experiment": "T20 dual-timescale strength representation diagnostic",
   "status": "completed_diagnostic_only",
   "date": "2026-08-24",
-  "corpus": {
-    "sha256": "e868d332681b38df6f39376e6d7daf14143c57fc775abbf1cc830d8bb80dd997",
-    "male_matches": 3411,
-    "female_matches": 2066
-  },
+  "corpus": {"sha256": "e868d332681b38df6f39376e6d7daf14143c57fc775abbf1cc830d8bb80dd997", "male_matches": 3411, "female_matches": 2066},
   "hypothesis": "A slow persistent Elo state (K=20) plus a faster current-strength Elo state (male K=80, female K=160) can represent T20 team strength more robustly than a single fixed-K Elo state.",
   "representation": "Replace the three single-Elo features with six dual-timescale features: slow_team_elo, slow_opponent_elo, slow_difference, fast_team_elo, fast_opponent_elo, fast_difference; retain the other ten non-Elo features unchanged. This yields a 16-feature challenger.",
   "model": "StandardScaler + LogisticRegression(max_iter=2000)",
@@ -15,10 +11,7 @@
   "future_holdout": {"size": 171, "preceding_validation": 310, "selection": "last 171 chronological matches; immediately preceding 310 used as validation"},
   "results": {
     "male": {
-      "test": {
-        "challenger_b_raw": {"accuracy": 0.7173489278752436, "log_loss": 0.5610395229048389, "brier": 0.1897584391261469, "auc": 0.7917946067552366, "ece": 0.05979961220224319},
-        "dual": {"accuracy": 0.7309941520467836, "log_loss": 0.5567443461298995, "brier": 0.18806123095244198, "auc": 0.7957468154318548, "ece": 0.06183545285104238}
-      },
+      "test": {"challenger_b_raw": {"accuracy": 0.7173489278752436, "log_loss": 0.5610395229048389, "brier": 0.1897584391261469, "auc": 0.7917946067552366, "ece": 0.05979961220224319}, "dual": {"accuracy": 0.7309941520467836, "log_loss": 0.5567443461298995, "brier": 0.18806123095244198, "auc": 0.7957468154318548, "ece": 0.06183545285104238}},
       "rolling_origin": [
         {"fraction": 0.50, "challenger_b_raw": {"accuracy": 0.6832844574780058, "log_loss": 0.5870200540694585, "brier": 0.20132785829059327, "auc": 0.7637608366588688, "ece": 0.06913097032158827}, "dual": {"accuracy": 0.6774193548387096, "log_loss": 0.58706925631611, "brier": 0.20144134701185953, "auc": 0.7617311132516857, "ece": 0.07160944737724934}},
         {"fraction": 0.55, "challenger_b_raw": {"accuracy": 0.7008797653958945, "log_loss": 0.5798638800666696, "brier": 0.1983227664067681, "auc": 0.7743378052975576, "ece": 0.07545664380812862}, "dual": {"accuracy": 0.7008797653958945, "log_loss": 0.5796389834850568, "brier": 0.19836476992546836, "auc": 0.7743722050223599, "ece": 0.07631680535857244}},
@@ -26,42 +19,20 @@
         {"fraction": 0.65, "challenger_b_raw": {"accuracy": 0.7419354838709677, "log_loss": 0.565918963072866, "brier": 0.1906939125888855, "auc": 0.7942616732188428, "ece": 0.08864035061610955}, "dual": {"accuracy": 0.7419354838709677, "log_loss": 0.5669943350162677, "brier": 0.1911061621406579, "auc": 0.7924684460997309, "ece": 0.08757030061497408}},
         {"fraction": 0.70, "challenger_b_raw": {"accuracy": 0.7419354838709677, "log_loss": 0.5352306513895885, "brier": 0.1783839273500956, "auc": 0.8283099366914395, "ece": 0.07989510401479036}, "dual": {"accuracy": 0.7595307917888563, "log_loss": 0.5342525727718216, "brier": 0.17790928388058336, "auc": 0.8302711257913571, "ece": 0.09378812181481161}}
       ],
-      "future_holdout_171": {
-        "challenger_b_raw": {"accuracy": 0.7543859649122807, "log_loss": 0.5550918127038161, "brier": 0.18471804690957716, "auc": 0.795423403672239, "ece": 0.09995125817309872},
-        "dual": {"accuracy": 0.7660818713450293, "log_loss": 0.5519971540891441, "brier": 0.18359901707747686, "auc": 0.7966566182515759, "ece": 0.11966106575824811}
-      }
+      "future_holdout_171": {"challenger_b_raw": {"accuracy": 0.7543859649122807, "log_loss": 0.5550918127038161, "brier": 0.18471804690957716, "auc": 0.795423403672239, "ece": 0.09995125817309872}, "dual": {"accuracy": 0.7660818713450293, "log_loss": 0.5519971540891441, "brier": 0.18359901707747686, "auc": 0.7966566182515759, "ece": 0.11966106575824811}}
     },
     "female": {
-      "test": {
-        "challenger_b_raw": {"accuracy": 0.7451612903225806, "log_loss": 0.5218116044186535, "brier": 0.17413734648554866, "auc": 0.8233413269384492, "ece": 0.06988704552878561},
-        "dual": {"accuracy": 0.7387096774193549, "log_loss": 0.521172986779303, "brier": 0.17388864377340987, "auc": 0.8233413269384493, "ece": 0.07503960623856906}
-      },
+      "test": {"challenger_b_raw": {"accuracy": 0.7451612903225806, "log_loss": 0.5218116044186535, "brier": 0.17413734648554866, "auc": 0.8233413269384492, "ece": 0.06988704552878561}, "dual": {"accuracy": 0.7387096774193549, "log_loss": 0.521172986779303, "brier": 0.17388864377340987, "auc": 0.8233413269384493, "ece": 0.07503960623856906}},
       "rolling_origin": [
         {"fraction": 0.50, "challenger_b_raw": {"accuracy": 0.7427184466019418, "log_loss": 0.5293533469984977, "brier": 0.17672672272671033, "auc": 0.8219268476621417, "ece": 0.10183484713598771}, "dual": {"accuracy": 0.7427184466019418, "log_loss": 0.5305186301735726, "brier": 0.17723009511942753, "auc": 0.8197586726998493, "ece": 0.1183079207583652}},
         {"fraction": 0.55, "challenger_b_raw": {"accuracy": 0.7135922330097088, "log_loss": 0.5500591620333035, "brier": 0.18589233000016334, "auc": 0.7938829787234042, "ece": 0.0662281571047986}, "dual": {"accuracy": 0.7135922330097088, "log_loss": 0.5517011764318469, "brier": 0.18655559333553928, "auc": 0.7928381458966566, "ece": 0.07374816823270071}},
-        {"fraction": 0.60, "challenger_b_raw": {"accuracy": 0.7815533980582524, "log_loss": 0.48834974662774355, "brier": 0.15853238656601734, "auc": 0.8542145593869732, "ece": 0.07580244360395386}, "dual": {"accuracy": 0.7912621359223301, "log_loss": 0.48664280069573285, "brier": 0.15781471659509763, "auc": 0.855268168? , "ece": 0.08800332464141433}},
+        {"fraction": 0.60, "challenger_b_raw": {"accuracy": 0.7815533980582524, "log_loss": 0.48834974662774355, "brier": 0.15853238656601734, "auc": 0.8542145593869732, "ece": 0.07580244360395386}, "dual": {"accuracy": 0.7912621359223301, "log_loss": 0.48664280069573285, "brier": 0.15781471659509763, "auc": 0.8552681992337166, "ece": 0.08800332464141433}},
         {"fraction": 0.65, "challenger_b_raw": {"accuracy": 0.7864077669902912, "log_loss": 0.49546211054775624, "brier": 0.16077930700432252, "auc": 0.849160945842868, "ece": 0.07400436521516626}, "dual": {"accuracy": 0.7815533980582524, "log_loss": 0.49491914155942995, "brier": 0.16051704342360862, "auc": 0.8495423340961098, "ece": 0.07006560386182833}},
         {"fraction": 0.70, "challenger_b_raw": {"accuracy": 0.7572815533980582, "log_loss": 0.5325760511409717, "brier": 0.17670080591697532, "auc": 0.8159953636627064, "ece": 0.0957754599999333}, "dual": {"accuracy": 0.7475728155339806, "log_loss": 0.53178377422212, "brier": 0.17635919757580085, "auc": 0.8184101226697575, "ece": 0.07997114313428799}}
       ],
-      "future_holdout_171": {
-        "challenger_b_raw": {"accuracy": 0.7719298245614035, "log_loss": 0.5015058212113207, "brier": 0.16572162472326749, "auc": 0.8399014778325123, "ece": 0.07739554112922521},
-        "dual": {"accuracy": 0.7602339181286549, "log_loss": 0.5026251257474919, "brier": 0.16614779579603484, "auc": 0.8371647509578544, "ece": 0.056900567630191495}
-      }
+      "future_holdout_171": {"challenger_b_raw": {"accuracy": 0.7719298245614035, "log_loss": 0.5015058212113207, "brier": 0.16572162472326749, "auc": 0.8399014778325123, "ece": 0.07739554112922521}, "dual": {"accuracy": 0.7602339181286549, "log_loss": 0.5026251257474919, "brier": 0.16614779579603484, "auc": 0.8371647509578544, "ece": 0.056900567630191495}}
     }
   },
-  "decision": {
-    "male": "REJECT AS REPLACEMENT CANDIDATE FOR NOW",
-    "female": "REJECT AS REPLACEMENT CANDIDATE FOR NOW",
-    "overall": "REJECT dual-timescale representation in this six-feature form as a promotion candidate. It is diagnostically informative but not consistently superior to raw Challenger B across frozen test, all rolling origins, and future holdout."
-  },
-  "provenance": {
-    "dual_timescale_strength_sha": "f4cb42ef2af4a85997f34be756ec937670ce1141",
-    "challenger_b_sha": "3d58c5c1af22fbee5b33509e881a838829e3e49d",
-    "model_v0_sha": "09b0aedbdf109095bf7e1177f57378d702d2b88d",
-    "parser_sha": "cf1132155b78a2804d9d8b966b9363e844aa49be",
-    "normalizer_sha": "b7c440cd2ab5d4c2ed5f870fa1fd1e730ae1ff31",
-    "team_form_sha": "496339211d1f4ce0e018baad3b5561d88c2222f1",
-    "context_sha": "7c95aa0be8763160d738061dc3dc60aa8955501d",
-    "ball_strength_sha": "4e83b5f94c3d1d9a0e1f2d0efb4dbc0a45fa06b6"
-  }
+  "decision": {"male": "REJECT AS REPLACEMENT CANDIDATE FOR NOW", "female": "REJECT AS REPLACEMENT CANDIDATE FOR NOW", "overall": "REJECT dual-timescale representation in this six-feature form as a promotion candidate. It is diagnostically informative but not consistently superior to raw Challenger B across frozen test, all rolling origins, and future holdout."},
+  "provenance": {"dual_timescale_strength_sha": "f4cb42ef2af4a85997f34be756ec937670ce1141", "challenger_b_sha": "3d58c5c1af22fbee5b33509e881a838829e3e49d", "model_v0_sha": "09b0aedbdf109095bf7e1177f57378d702d2b88d", "parser_sha": "cf1132155b78a2804d9d8b966b9363e844aa49be", "normalizer_sha": "b7c440cd2ab5d4c2ed5f870fa1fd1e730ae1ff31", "team_form_sha": "496339211d1f4ce0e018baad3b5561d88c2222f1", "context_sha": "7c95aa0be8763160d738061dc3dc60aa8955501d", "ball_strength_sha": "4e83b5f94c3d1d9a0e1f2d0efb4dbc0a45fa06b6"}
 }
