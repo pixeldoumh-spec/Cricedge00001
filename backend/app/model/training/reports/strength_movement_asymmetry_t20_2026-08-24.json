@@ -1,0 +1,56 @@
+{
+  "experiment": "T20 strength-movement asymmetry diagnostic",
+  "status": "completed_diagnostic_only",
+  "date": "2026-08-24",
+  "corpus": {"sha256": "e868d332681b38df6f39376e6d7daf14143c57fc775abbf1cc830d8bb80dd997", "source": "uploaded t20s_json.zip", "male_matches": 3411, "female_matches": 2066},
+  "protocol": {"male_fast_k": 80, "female_fast_k": 160, "slow_k": 20, "non_strength_features_unchanged": true, "frozen_split": {"male": [2387, 511, 513], "female": [1446, 310, 310]}, "rolling_origins": [0.5, 0.55, 0.6, 0.65, 0.7], "rolling_validation_fraction": 0.1, "rolling_evaluation_fraction": 0.1, "future_holdout": 171, "future_validation": 310, "calibration": false},
+  "variants": {"team_delta_only": ["team_delta"], "opponent_delta_only": ["opponent_delta"], "relative_delta_only": ["relative_delta"], "team_opponent_deltas": ["team_delta", "opponent_delta"], "relative_delta_magnitude": ["relative_delta", "relative_delta_abs"], "team_opponent_magnitude": ["team_delta", "opponent_delta", "team_delta_abs", "opponent_delta_abs"], "directional_signed": ["team_delta_pos", "team_delta_neg", "opponent_delta_pos", "opponent_delta_neg", "relative_delta_pos", "relative_delta_neg"], "challenger_b": ["fast_team_elo", "fast_opponent_elo", "fast_difference"]},
+  "male": {
+    "frozen_test": {
+      "challenger_b": {"log_loss": 0.56104, "brier": 0.18976, "auc": 0.79179, "ece": 0.05980},
+      "team_delta_only": {"log_loss": 0.60815, "brier": 0.21041, "auc": 0.74326, "ece": 0.08187},
+      "opponent_delta_only": {"log_loss": 0.58917, "brier": 0.20213, "auc": 0.76881, "ece": 0.06666},
+      "relative_delta_only": {"log_loss": 0.55482, "brier": 0.18727, "auc": 0.79997, "ece": 0.05982},
+      "team_opponent_deltas": {"log_loss": 0.55653, "brier": 0.18803, "auc": 0.79906, "ece": 0.06886},
+      "relative_delta_magnitude": {"log_loss": 0.55297, "brier": 0.18662, "auc": 0.80079, "ece": 0.05907},
+      "team_opponent_magnitude": {"log_loss": 0.54624, "brier": 0.18418, "auc": 0.80306, "ece": 0.05846},
+      "directional_signed": {"log_loss": 0.54574, "brier": 0.18410, "auc": 0.80336, "ece": 0.05546}
+    },
+    "rolling_log_loss_wins_vs_b": {"team_delta_only": 0, "opponent_delta_only": 0, "relative_delta_only": 0, "team_opponent_deltas": 0, "relative_delta_magnitude": 0, "team_opponent_magnitude": 2, "directional_signed": 2, "challenger_b": 0},
+    "future_171": {
+      "challenger_b": {"log_loss": 0.55509, "brier": 0.18472, "auc": 0.79542, "ece": 0.09995},
+      "team_delta_only": {"log_loss": 0.60338, "brier": 0.20724, "auc": 0.75363, "ece": 0.08169},
+      "opponent_delta_only": {"log_loss": 0.58318, "brier": 0.19813, "auc": 0.76925, "ece": 0.07010},
+      "relative_delta_only": {"log_loss": 0.54687, "brier": 0.18235, "auc": 0.80488, "ece": 0.08138},
+      "team_opponent_deltas": {"log_loss": 0.55017, "brier": 0.18379, "auc": 0.79885, "ece": 0.09860},
+      "relative_delta_magnitude": {"log_loss": 0.54405, "brier": 0.18161, "auc": 0.80186, "ece": 0.06827},
+      "team_opponent_magnitude": {"log_loss": 0.54929, "brier": 0.18452, "auc": 0.79049, "ece": 0.07963},
+      "directional_signed": {"log_loss": 0.54674, "brier": 0.18361, "auc": 0.79104, "ece": 0.08954}
+    }
+  },
+  "female": {
+    "frozen_test": {
+      "challenger_b": {"log_loss": 0.52181, "brier": 0.17414, "auc": 0.82334, "ece": 0.06989},
+      "team_delta_only": {"log_loss": 0.54048, "brier": 0.18099, "auc": 0.80597, "ece": 0.08675},
+      "opponent_delta_only": {"log_loss": 0.53513, "brier": 0.17956, "auc": 0.81850, "ece": 0.08470},
+      "relative_delta_only": {"log_loss": 0.51697, "brier": 0.17157, "auc": 0.82385, "ece": 0.04598},
+      "team_opponent_deltas": {"log_loss": 0.51981, "brier": 0.17308, "auc": 0.82502, "ece": 0.07462},
+      "relative_delta_magnitude": {"log_loss": 0.51689, "brier": 0.17155, "auc": 0.82393, "ece": 0.04591},
+      "team_opponent_magnitude": {"log_loss": 0.52257, "brier": 0.17384, "auc": 0.82216, "ece": 0.05598},
+      "directional_signed": {"log_loss": 0.52246, "brier": 0.17382, "auc": 0.82254, "ece": 0.05699}
+    },
+    "rolling_log_loss_wins_vs_b": {"team_delta_only": 0, "opponent_delta_only": 0, "relative_delta_only": 4, "team_opponent_deltas": 4, "relative_delta_magnitude": 4, "team_opponent_magnitude": 4, "directional_signed": 4, "challenger_b": 0},
+    "future_171": {
+      "challenger_b": {"log_loss": 0.50151, "brier": 0.16572, "auc": 0.83990, "ece": 0.07740},
+      "team_delta_only": {"log_loss": 0.52800, "brier": 0.17560, "auc": 0.82061, "ece": 0.11415},
+      "opponent_delta_only": {"log_loss": 0.52036, "brier": 0.17304, "auc": 0.82375, "ece": 0.05493},
+      "relative_delta_only": {"log_loss": 0.51126, "brier": 0.16930, "auc": 0.83279, "ece": 0.07165},
+      "team_opponent_deltas": {"log_loss": 0.50929, "brier": 0.16853, "auc": 0.82978, "ece": 0.04996},
+      "relative_delta_magnitude": {"log_loss": 0.51124, "brier": 0.16933, "auc": 0.83238, "ece": 0.07155},
+      "team_opponent_magnitude": {"log_loss": 0.51183, "brier": 0.16880, "auc": 0.82827, "ece": 0.04892},
+      "directional_signed": {"log_loss": 0.51194, "brier": 0.16886, "auc": 0.82827, "ece": 0.04273}
+    }
+  },
+  "decision": {"male": "No promotion. Relative movement is promising on frozen test/future holdout, but raw Challenger B remains more robust across the five rolling origins; magnitude/directional variants improve only 2/5 rolling log-loss windows and lose important later discrimination.", "female": "No promotion. Relative/delta variants beat Challenger B on 4/5 rolling log-loss windows and improve frozen test log loss/Brier, but Challenger B wins the independent 171-match future holdout on log loss/AUC; therefore no universal replacement is justified.", "conclusion": "Recent strength movement is real predictive signal, but its useful form is population- and time-dependent. Evidence does not support replacing Challenger B with a single team/opponent/relative delta formulation.", "next_question": "Investigate whether movement should be represented with a bounded recency-decay state or whether the delta signal is interacting with existing form/context features; do not promote a delta variant from this diagnostic."},
+  "execution_note": "The uploaded corpus hash matches the locked corpus. The reconstructed Challenger B reference reproduces the preserved frozen-test raw metrics (male log loss 0.56104; female log loss 0.52181), providing an execution sanity check before interpreting the diagnostic variants."
+}
