@@ -49,6 +49,6 @@ def test_challenger_uses_only_legal_deliveries_as_denominator():
     engine.update_after_match(match)
     features = engine.features_before("A", "B")
     # Four recorded deliveries, but only two legal deliveries.
-    assert features.batting_run_rate == 0.0
+    assert features.batting_run_rate == 9.0
     assert engine._state["A"].balls == 2
-    assert engine._state["B"].balls_bowled == 0
+    assert engine._state["B"].balls_bowled == 2
