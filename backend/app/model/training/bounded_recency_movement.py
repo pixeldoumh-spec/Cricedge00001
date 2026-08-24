@@ -18,7 +18,7 @@ silently substituting a career-to-date movement for an H-match movement.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Mapping, Sequence, Any
+from typing import Any, Mapping, Sequence
 
 
 @dataclass(frozen=True)
@@ -74,11 +74,9 @@ def recent_rate(
     """
     if horizon_matches <= 0:
         raise ValueError("horizon_matches must be positive")
-
     team_rows = [r for r in history if r.get("team") == team]
     if len(team_rows) < horizon_matches:
         return 0.0
-
     baseline = float(team_rows[-horizon_matches]["fast_elo"])
     return (float(current_fast_elo) - baseline) / horizon_matches
 
@@ -107,12 +105,8 @@ def protocol() -> dict:
         "baseline": "post-match fast Elo state after the H-th most recent completed team match",
         "cold_start": "0.0 when fewer than H completed team matches exist",
         "configs": [
-            {
-                "horizon_matches": c.horizon_matches,
-                "cap_elo": c.cap_elo,
-                "use_sign": c.use_sign,
-                "use_magnitude": c.use_magnitude,
-            }
+            {"horizon_matches": c.horizon_matches, "cap_elo": c.cap_elo,
+             "use_sign": c.use_sign, "use_magnitude": c.use_magnitude}
             for c in CONFIGS
         ],
     }
