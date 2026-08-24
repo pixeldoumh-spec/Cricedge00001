@@ -3,47 +3,12 @@
   "status": "completed_rejected",
   "date": "2026-08-24",
   "hypothesis": "Replace the all-delivery denominator in the four historical ball-strength rate features with legal-delivery denominators, excluding wides and no-balls, while changing no other feature, estimator, split, or population rule.",
-  "corpus": {
-    "sha256": "e868d332681b38df6f39376e6d7daf14143c57fc775abbf1cc830d8bb80dd997",
-    "source": "uploaded t20s_json.zip",
-    "matches_male": 3411,
-    "matches_female": 2066
-  },
-  "contract": {
-    "features": ["team_elo", "opponent_elo", "elo_difference", "team_form_3", "team_form_5", "team_form_10", "venue_team_win_rate", "venue_bat_first_win_rate", "head_to_head_win_rate", "batting_run_rate", "bowling_run_rate", "batting_wicket_rate", "bowling_wicket_rate"],
-    "estimator": "StandardScaler + LogisticRegression(max_iter=2000)",
-    "chronological": true,
-    "changed_features": ["batting_run_rate", "bowling_run_rate", "batting_wicket_rate", "bowling_wicket_rate"],
-    "calibration": "validation-only Platt; reported for both genders, but W0 production comparison uses raw probabilities because W0 calibrator is not promoted"
-  },
-  "male": {
-    "split": {"train": 2387, "validation": 511, "test": 513},
-    "raw": {"accuracy": 0.6939571150097466, "log_loss": 0.5904379563342222, "brier_score": 0.2018598286888512, "auc": 0.7656036238713405, "ece_10": 0.07059526186937835},
-    "calibrated": {"accuracy": 0.6861598440545809, "log_loss": 0.5834199079708074, "brier_score": 0.19821440989954275, "auc": 0.7656036238713405, "ece_10": 0.04384924339016995},
-    "reference_v0": {"accuracy": 0.692, "log_loss": 0.58121235, "brier_score": 0.1972238, "auc": 0.76850698, "ece_10": 0.0498001},
-    "decision": "reject",
-    "reason": "Validation-only calibrated Challenger A is worse than the V0 production reference on accuracy, log loss, Brier, and AUC. ECE improves, but not enough to justify promotion."
-  },
-  "female": {
-    "split": {"train": 1446, "validation": 310, "test": 310},
-    "raw": {"accuracy": 0.7161290322580646, "log_loss": 0.5410207672842251, "brier_score": 0.18152857662679622, "auc": 0.8049560351718624, "ece_10": 0.0650793908666406},
-    "calibrated": {"accuracy": 0.7161290322580646, "log_loss": 0.533287693073063, "brier_score": 0.17954024872180144, "auc": 0.8049560351718624, "ece_10": 0.04495712002059143},
-    "reference_w0_raw": {"accuracy": 0.7161290322580646, "log_loss": 0.5287449050641639, "brier_score": 0.17788212341928583, "auc": 0.8094156253944211, "ece_10": 0.05679022633577965},
-    "decision": "reject",
-    "reason": "Raw Challenger A is the production-compatible W0 comparison and is worse on log loss, Brier, AUC, and ECE, with identical accuracy. Calibrated results are not promotion-eligible because W0 explicitly forbids a production calibrator."
-  },
+  "corpus": {"sha256": "e868d332681b38df6f39376e6d7daf14143c57fc775abbf1cc830d8bb80dd997", "source": "uploaded t20s_json.zip", "matches_male": 3411, "matches_female": 2066},
+  "contract": {"features": ["team_elo", "opponent_elo", "elo_difference", "team_form_3", "team_form_5", "team_form_10", "venue_team_win_rate", "venue_bat_first_win_rate", "head_to_head_win_rate", "batting_run_rate", "bowling_run_rate", "batting_wicket_rate", "bowling_wicket_rate"], "estimator": "StandardScaler + LogisticRegression(max_iter=2000)", "chronological": true, "changed_features": ["batting_run_rate", "bowling_run_rate", "batting_wicket_rate", "bowling_wicket_rate"], "calibration": "validation-only Platt; reported for both genders, but W0 production comparison uses raw probabilities because W0 calibrator is not promoted"},
+  "male": {"split": {"train": 2387, "validation": 511, "test": 513}, "raw": {"accuracy": 0.6939571150097466, "log_loss": 0.5904379563342222, "brier_score": 0.2018598286888512, "auc": 0.7656036238713405, "ece_10": 0.07059526186937835}, "calibrated": {"accuracy": 0.6861598440545809, "log_loss": 0.5834199079708074, "brier_score": 0.19821440989954275, "auc": 0.7656036238713405, "ece_10": 0.04384924339016995}, "reference_v0": {"accuracy": 0.692, "log_loss": 0.58121235, "brier_score": 0.1972238, "auc": 0.76850698, "ece_10": 0.0498001}, "decision": "reject", "reason": "Validation-only calibrated Challenger A is worse than the V0 production reference on accuracy, log loss, Brier, and AUC. ECE improves, but not enough to justify promotion."},
+  "female": {"split": {"train": 1446, "validation": 310, "test": 310}, "raw": {"accuracy": 0.7161290322580646, "log_loss": 0.5410207672842251, "brier_score": 0.18152857662679622, "auc": 0.8049560351718624, "ece_10": 0.0650793908666406}, "calibrated": {"accuracy": 0.7161290322580646, "log_loss": 0.533287693073063, "brier_score": 0.17954024872180144, "auc": 0.8049560351718624, "ece_10": 0.04495712002059143}, "reference_w0_raw": {"accuracy": 0.7161290322580646, "log_loss": 0.5287449050641639, "brier_score": 0.17788212341928583, "auc": 0.8094156253944211, "ece_10": 0.05679022633577965}, "decision": "reject", "reason": "Raw Challenger A is the production-compatible W0 comparison and is worse on log loss, Brier, AUC, and ECE, with identical accuracy. Calibrated results are not promotion-eligible because W0 explicitly forbids a production calibrator."},
   "overall_decision": "reject",
   "promotion": false,
   "v0_w0_modified": false,
-  "provenance": {
-    "runner_sha": "3ad9e273d27814402ed6ac01fac6a8fcb2907504",
-    "challenger_logic_sha": "d483edd73cb0ae01874379d593dcdac9b3b89b9b",
-    "model_v0_sha": "09b0aedbdf109095bf7e1177f57378d702d2b88d",
-    "parser_sha": "cf1132155b78a2804d9d8b966b9363e844aa49be",
-    "normalizer_sha": "b7c440cd2ab5d4c2ed5f870fa1fd1e730ae1ff31",
-    "team_form_sha": "496339211d1f4ce0e018baad3b5561d88c2222f1",
-    "context_sha": "7c95aa0be8763160d738061dc3dc60aa8955501d",
-    "ball_strength_sha": "4e83b5f94c3d1d9a0e1f2d0efb4dbc0a45fa06b6",
-    "calibration_sha": "08fbfd1a7617df7e0c8e456b1378d9d3ed095b5"
-  }
+  "provenance": {"runner_sha": "3ad9e273d27814402ed6ac01fac6a8fcb2907504", "challenger_logic_sha": "d483edd73cb0ae01874379d593dcdac9b3b89b9b", "model_v0_sha": "09b0aedbdf109095bf7e1177f57378d702d2b88d", "parser_sha": "cf1132155b78a2804d9d8b966b9363e844aa49be", "normalizer_sha": "b7c440cd2ab5d4c2ed5f870fa1fd1e730ae1ff31", "team_form_sha": "496339211d1f4ce0e018baad3b5561d88c2222f1", "context_sha": "7c95aa0be8763160d738061dc3dc60aa8955501d", "ball_strength_sha": "4e83b5f94c3d1d9a0e1f2d0efb4dbc0a45fa06b6", "calibration_sha": "08fbfd1a7617df7e0c8e456b13792d8f3ed095b5"}
 }
