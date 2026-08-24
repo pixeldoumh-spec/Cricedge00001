@@ -1,6 +1,6 @@
 {
   "experiment": "T20 Challenger B",
-  "status": "candidate_evidence_complete",
+  "status": "completed_candidate_replacement",
   "date": "2026-08-24",
   "hypothesis": "A more responsive chronological Elo strength representation can improve the current 13-feature logistic T20 models. K is selected only on validation log loss from a predeclared grid; all other features, estimator, population and chronological split rules remain unchanged.",
   "corpus": {"sha256": "e868d332681b38df6f39376e6d7daf14143c57fc775abbf1cc830d8bb80dd997", "source": "uploaded t20s_json.zip", "male_matches": 3411, "female_matches": 2066},
@@ -9,19 +9,23 @@
   "male": {
     "selected_k": 80,
     "frozen_reference": {"accuracy":0.6920,"log_loss":0.58121235,"brier_score":0.19722380,"auc":0.76850698,"ece_10":0.04980010},
-    "challenger_test": {"accuracy":0.724609375,"log_loss":0.553378164537349,"brier_score":0.18686306272701442,"auc":0.7918110092023135,"ece_10":0.044012824334305575},
-    "deltas": {"accuracy":0.032609375,"log_loss":-0.02783418546265104,"brier_score":-0.010360737272985587,"auc":0.02330402920231356,"ece_10":-0.005787275665694425},
-    "rolling_origin": {"log_loss_improved":5,"brier_improved":5,"auc_improved":5,"ece_improved":3},
-    "future_holdout": {"baseline_log_loss":0.597311359715738,"challenger_log_loss":0.5705549455485274,"baseline_brier":0.2024780073830763,"challenger_brier":0.1920272311369651,"baseline_auc":0.7567428806133626,"challenger_auc":0.7839197699890471,"baseline_ece":0.05719915808275899,"challenger_ece":0.05908944302419549}
+    "challenger_test": {"accuracy":0.7251461988304093,"log_loss":0.553206322047046,"brier_score":0.18679267943197364,"auc":0.7917946067552366,"ece_10":0.045797560195264875},
+    "deltas": {"accuracy":0.03314619883040929,"log_loss":-0.028006027952954,"brier_score":-0.01043112056802635,"auc":0.023287626744868124,"ece_10":-0.004002539804735125},
+    "rolling_origin_fixed_k_80_vs_k20": {"windows":5,"accuracy_improved":5,"log_loss_improved":5,"brier_improved":5,"auc_improved":5,"ece_improved":3},
+    "future_holdout_171": {"baseline_calibrated":{"accuracy":0.7134502923976608,"log_loss":0.5852304714556257,"brier":0.1952948082862672,"auc":0.7704850644012059,"ece":0.06706470212992384},"challenger_calibrated":{"accuracy":0.7602339181286549,"log_loss":0.55130952795068,"brier":0.18241433755451822,"auc":0.797752808988764,"ece":0.10270771121316587}},
+    "decision": "candidate_replacement_pending_calibration_gate",
+    "reason": "The K=80 challenger improves every primary metric on the frozen 513-match test and wins accuracy, log loss, Brier and AUC in all five rolling-origin windows plus the 171-match future holdout. ECE improves on the main test and 3/5 rolling windows, but worsens on the future holdout. The strength improvement is therefore robust, but probability calibration should be resolved before replacing the production reference."
   },
   "female": {
     "selected_k": 160,
     "frozen_reference": {"accuracy":0.7161290322580646,"log_loss":0.5287449050641639,"brier_score":0.17788212341928583,"auc":0.8094156253944211,"ece_10":0.05679022633577965},
-    "challenger_test": {"accuracy":0.7451612903225806,"log_loss":0.5218116044186534,"brier_score":0.17413734648554866,"auc":0.8233413269384492,"ece_10":0.0698870455287856},
-    "deltas": {"accuracy":0.029032258064516037,"log_loss":-0.006933300645510565,"brier_score":-0.003744776933737176,"auc":0.013925701544028057,"ece_10":0.01309681919300594},
-    "rolling_origin": {"log_loss_improved":5,"brier_improved":5,"auc_improved":5,"ece_improved":4},
-    "future_holdout": {"baseline_log_loss":0.5416702624735912,"challenger_log_loss":0.5326261491127465,"baseline_brier":0.1841438237093983,"challenger_brier":0.1800442631474329,"baseline_auc":0.7972165141042405,"challenger_auc":0.8094526433775454,"baseline_ece":0.08866880231597216,"challenger_ece":0.06757704888898002}
+    "challenger_test_raw": {"accuracy":0.7451612903225806,"log_loss":0.5218116044186533,"brier_score":0.17413734648554866,"auc":0.8233413269384492,"ece_10":0.06988704552878558},
+    "deltas_raw": {"accuracy":0.02903225806451605,"log_loss":-0.00693330024551059,"brier_score":-0.00374477729373717,"auc":0.013925700953958207,"ece_10":0.01309681919300593},
+    "rolling_origin_fixed_k_160_vs_k20": {"windows":5,"accuracy_improved":5,"log_loss_improved":5,"brier_improved":5,"auc_improved":5,"ece_improved":3},
+    "future_holdout_171": {"baseline_raw":{"accuracy":0.7368421052631579,"log_loss":0.5113817350449599,"brier":0.1698839719308561,"auc":0.8289545703338808,"ece":0.08626653256017189},"challenger_raw":{"accuracy":0.7719298245614035,"log_loss":0.5015058212113207,"brier":0.1657216247232675,"auc":0.8399014778325123,"ece":0.07739554112922518}},
+    "decision": "candidate_replacement_pending_calibration_gate",
+    "reason": "The K=160 challenger improves accuracy, log loss, Brier and AUC on the frozen 310-match test and in all five rolling-origin windows. Main-test ECE is worse, but the 171-match future holdout reverses that and improves ECE as well. Because W0 production explicitly uses raw probabilities, the calibrated challenger is diagnostic only; a production replacement should first establish whether the improved strength representation retains calibration under the final production protocol."
   },
-  "decision": {"male":"candidate_replacement","female":"candidate_but_requires_calibration_follow_up","overall":"do_not_replace_both_references_yet"},
-  "provenance": {"challenger_b_sha":"3d58c5c1af22fbee5b33509e881a838829e3e49d","runner_sha":"d69f56e2a7fa643f732c0ba9dfd7ba64dc174799","model_v0_sha":"09b0aedbdf109095bf7e1177f57378d702d2b88d","team_form_sha":"496339211d1f4ce0e018baad3b5561d88c2222f1","context_sha":"7c95aa0be8763160d738061dc3dc60aa8955501d","ball_strength_sha":"4e83b5f94c3d1d9a0e1f2d0efb4dbc0a45fa06b6","calibration_sha":"08fbfd1a7617df7e0c8e456b1378d9d3ed095b5","production_lock_sha":"81d93a7f55b2c02b1a48115975490b19d5b7ce0a"}
+  "implementation_note": "The initial Challenger B runner used percentage-derived boundaries that would produce 2387/512/512 for men rather than the frozen 2387/511/513 contract. That implementation was corrected before these results were accepted. The final runner asserts the exact frozen split counts.",
+  "provenance": {"challenger_b_sha":"3d58c5c1af22fbee5b33509e881a838829e3e49d","runner_sha":"b414c75fa65846d0e714e11e8dc031ffd135d52c","model_v0_sha":"09b0aedbdf109095bf7e1177f57378d702d2b88d","parser_sha":"cf1132155b78a2804d9d8b966b9363e844aa49be","normalizer_sha":"b7c440cd2ab5d4c2ed5f870fa1fd1e730ae1ff31","team_form_sha":"496339211d1f4ce0e018baad3b5561d88c2222f1","context_sha":"7c95aa0be8763160d738061dc3dc60aa8955501d","ball_strength_sha":"4e83b5f94c3d1d9a0e1f2d0efb4dbc0a45fa06b6","calibration_sha":"08fbfd1a7617df7e0c8e456b1378d9d3ed095b5","production_lock_sha":"81d93a7f55b2c02b1a48115975490b19d5b7ce0a"}
 }
