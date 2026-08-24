@@ -1,0 +1,26 @@
+{
+  "experiment": "T20 Challenger B calibration/reconciliation",
+  "date": "2026-08-24",
+  "status": "closed_diagnostic",
+  "corpus_sha256": "e868d332681b38df6f39376e6d7daf14143c57fc775abbf1cc830d8bb80dd997",
+  "hypothesis": "Strict validation-only Platt calibration can recover Challenger B probability calibration without destroying its predictive gains.",
+  "male": {
+    "selected_k": 80,
+    "frozen_test_raw": {"accuracy":0.7173489278752436,"log_loss":0.561039522904864,"brier":0.1897584391261568,"auc":0.7917946067552366,"ece":0.05979961220227563},
+    "frozen_test_calibrated": {"accuracy":0.7251461988304093,"log_loss":0.553206322047046,"brier":0.18679267943197364,"auc":0.7917946067552366,"ece":0.045797560195264875},
+    "future_holdout_raw": {"accuracy":0.7543859649122807,"log_loss":0.5550918127038161,"brier":0.1847180469095772,"auc":0.795423403672239,"ece":0.09995125817309877},
+    "future_holdout_calibrated": {"accuracy":0.7485380116959064,"log_loss":0.552547944958134,"brier":0.1845478428859378,"auc":0.795423403672239,"ece":0.12074015031122648},
+    "decision":"reject_calibration_as_production_fix"
+  },
+  "female": {
+    "selected_k": 160,
+    "frozen_test_raw": {"accuracy":0.7451612903225806,"log_loss":0.5218116044186533,"brier":0.17413734648554866,"auc":0.8233413269384492,"ece":0.06988704552878558},
+    "frozen_test_calibrated": {"accuracy":0.7483870967741936,"log_loss":0.5130090465484526,"brier":0.17114570704534515,"auc":0.8233413269384492,"ece":0.04866040031487214},
+    "future_holdout_raw": {"accuracy":0.7719298245614035,"log_loss":0.5015058212113207,"brier":0.1657216247232675,"auc":0.8399014778325123,"ece":0.07739554112922518},
+    "future_holdout_calibrated": {"accuracy":0.7426900584795322,"log_loss":0.5134076435989938,"brier":0.1712775643685952,"auc":0.8399014778325123,"ece":0.10390422591480278},
+    "decision":"reject_calibration_as_production_fix"
+  },
+  "conclusion":"Validation-only Platt calibration is not a stable production fix for Challenger B. It improves the frozen test for both genders, but future-holdout behavior rejects promotion: male ECE worsens, while female accuracy, log loss, Brier and ECE worsen materially.",
+  "next_action":"Keep Challenger B raw as the strongest challenger. Do not promote calibration and do not alter V0/W0. Any next calibration hypothesis must be separately predeclared and temporally validated.",
+  "v0_w0_modified":false
+}
