@@ -1,0 +1,27 @@
+{
+  "experiment": "T20 Challenger B",
+  "status": "candidate_evidence_complete",
+  "date": "2026-08-24",
+  "hypothesis": "A more responsive chronological Elo strength representation can improve the current 13-feature logistic T20 models. K is selected only on validation log loss from a predeclared grid; all other features, estimator, population and chronological split rules remain unchanged.",
+  "corpus": {"sha256": "e868d332681b38df6f39376e6d7daf14143c57fc775abbf1cc830d8bb80dd997", "source": "uploaded t20s_json.zip", "male_matches": 3411, "female_matches": 2066},
+  "grid": [20,40,60,80,120,160,240,320],
+  "reference_policy": {"male": "validation-only Platt calibrated V0", "female": "raw logistic W0; calibrator not promoted"},
+  "male": {
+    "selected_k": 80,
+    "frozen_reference": {"accuracy":0.6920,"log_loss":0.58121235,"brier_score":0.19722380,"auc":0.76850698,"ece_10":0.04980010},
+    "challenger_test": {"accuracy":0.724609375,"log_loss":0.553378164537349,"brier_score":0.18686306272701442,"auc":0.7918110092023135,"ece_10":0.044012824334305575},
+    "deltas": {"accuracy":0.032609375,"log_loss":-0.02783418546265104,"brier_score":-0.010360737272985587,"auc":0.02330402920231356,"ece_10":-0.005787275665694425},
+    "rolling_origin": {"log_loss_improved":5,"brier_improved":5,"auc_improved":5,"ece_improved":3},
+    "future_holdout": {"baseline_log_loss":0.597311359715738,"challenger_log_loss":0.5705549455485274,"baseline_brier":0.2024780073830763,"challenger_brier":0.1920272311369651,"baseline_auc":0.7567428806133626,"challenger_auc":0.7839197699890471,"baseline_ece":0.05719915808275899,"challenger_ece":0.05908944302419549}
+  },
+  "female": {
+    "selected_k": 160,
+    "frozen_reference": {"accuracy":0.7161290322580646,"log_loss":0.5287449050641639,"brier_score":0.17788212341928583,"auc":0.8094156253944211,"ece_10":0.05679022633577965},
+    "challenger_test": {"accuracy":0.7451612903225806,"log_loss":0.5218116044186534,"brier_score":0.17413734648554866,"auc":0.8233413269384492,"ece_10":0.0698870455287856},
+    "deltas": {"accuracy":0.029032258064516037,"log_loss":-0.006933300645510565,"brier_score":-0.003744776933737176,"auc":0.013925701544028057,"ece_10":0.01309681919300594},
+    "rolling_origin": {"log_loss_improved":5,"brier_improved":5,"auc_improved":5,"ece_improved":4},
+    "future_holdout": {"baseline_log_loss":0.5416702624735912,"challenger_log_loss":0.5326261491127465,"baseline_brier":0.1841438237093983,"challenger_brier":0.1800442631474329,"baseline_auc":0.7972165141042405,"challenger_auc":0.8094526433775454,"baseline_ece":0.08866880231597216,"challenger_ece":0.06757704888898002}
+  },
+  "decision": {"male":"candidate_replacement","female":"candidate_but_requires_calibration_follow_up","overall":"do_not_replace_both_references_yet"},
+  "provenance": {"challenger_b_sha":"3d58c5c1af22fbee5b33509e881a838829e3e49d","runner_sha":"d69f56e2a7fa643f732c0ba9dfd7ba64dc174799","model_v0_sha":"09b0aedbdf109095bf7e1177f57378d702d2b88d","team_form_sha":"496339211d1f4ce0e018baad3b5561d88c2222f1","context_sha":"7c95aa0be8763160d738061dc3dc60aa8955501d","ball_strength_sha":"4e83b5f94c3d1d9a0e1f2d0efb4dbc0a45fa06b6","calibration_sha":"08fbfd1a7617df7e0c8e456b1378d9d3ed095b5","production_lock_sha":"81d93a7f55b2c02b1a48115975490b19d5b7ce0a"}
+}
