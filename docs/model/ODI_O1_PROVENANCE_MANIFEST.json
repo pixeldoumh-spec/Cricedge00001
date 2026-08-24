@@ -1,0 +1,34 @@
+{
+  "model": "men_odi_o1",
+  "parent": "men_odi_o0",
+  "corpus": {
+    "sha256": "f0798ef14e1f3f61720d41978289fe7318257263f59edba5dca0b35dbba64d6c",
+    "archive_json_files": 2569,
+    "decisive_rows": 2440
+  },
+  "source_commit": "5ab740f01985a174817c6be772a83501bf58c782",
+  "source_files": [
+    "backend/app/model/training/odi_o0_corpus.py",
+    "backend/app/model/training/odi_o0_features.py",
+    "backend/app/model/training/odi_o0_baseline.py",
+    "backend/app/model/training/odi_o1_features.py",
+    "backend/app/model/training/odi_o1_baseline.py",
+    "docs/model/ODI_O1_CONTROLLED_CHANGE.json",
+    "docs/model/ODI_O1_EVALUATION_REPORT.json"
+  ],
+  "runner_commit": "3438860cdeba0ad81ce7bdbba042d44b6574e054",
+  "result_commit": "8757ca55f5304f639ad11649e1cb3f6ed8e02eec",
+  "historical_result": "docs/model/ODI_O1_EVALUATION_REPORT.json",
+  "reproduced_result": "docs/model/ODI_O1_REPRODUCED_RESULT.json",
+  "main_test_status": "EXACT",
+  "main_calibration_selection_status": "EXACT",
+  "rolling_origin_status": "UNRECOVERED_HISTORICAL_PROTOCOL",
+  "future_holdout_status": "PROTOCOL_MISMATCH",
+  "historical_fingerprint": {
+    "value": "a64c5b01d338b08e018c92bf34c30355e41a380ba0209f190fad457bccc60d42",
+    "original_source_recovered": false,
+    "reconstructed_candidate": true
+  },
+  "scientific_decision": "REJECT_O1",
+  "provenance_policy": "Do not infer or tune an evaluation protocol solely to reproduce preserved numbers. Historical values without recovered executable procedure remain historical artifacts, not independently reproduced results."
+}
