@@ -1,0 +1,70 @@
+{
+  "experiment": "T20 dual-timescale strength decomposition",
+  "status": "diagnostic_only",
+  "corpus_sha256": "e868d332681b38df6f39376e6d7daf14143c57fc775abbf1cc830d8bb80dd997",
+  "protocol": {
+    "reference": "raw Challenger B",
+    "male_fast_k": 80,
+    "female_fast_k": 160,
+    "slow_k": 20,
+    "variants": ["fast_only", "slow_only", "delta_only", "slow_plus_delta", "team_opponent_delta", "dual_full"],
+    "selection": "none on test/future; fixed predeclared variants",
+    "rolling_origins": [0.50, 0.55, 0.60, 0.65, 0.70],
+    "future_holdout": "last 10 percent, untouched",
+    "calibration": false,
+    "estimator": "StandardScaler + LogisticRegression(max_iter=2000)"
+  },
+  "main_test": {
+    "male": {
+      "fast_only": {"accuracy": 0.7173489278752436, "log_loss": 0.561039522904864, "brier": 0.1897584391261568, "auc": 0.7917946067552366, "ece": 0.05979961220227563},
+      "slow_only": {"accuracy": 0.6978557504873295, "log_loss": 0.5886475223007682, "brier": 0.2010353772109099, "auc": 0.7685069803040395, "ece": 0.06098174123043255},
+      "delta_only": {"accuracy": 0.7270955165692008, "log_loss": 0.5564338747748983, "brier": 0.18799605235522318, "auc": 0.7990453895965708, "ece": 0.06626015466604389},
+      "slow_plus_delta": {"accuracy": 0.7309941520467836, "log_loss": 0.5565893929298034, "brier": 0.1879981685621252, "auc": 0.7959122535378111, "ece": 0.06100667288587549},
+      "team_opponent_delta": {"accuracy": 0.7270955165692008, "log_loss": 0.5565304372029538, "brier": 0.1880271465718054, "auc": 0.7990572977626127, "ece": 0.06629857196309593},
+      "dual_full": {"accuracy": 0.7309941520467836, "log_loss": 0.5567399572415034, "brier": 0.18806373123787386, "auc": 0.795753323431915, "ece": 0.06184225808199537}
+    },
+    "female": {
+      "fast_only": {"accuracy": 0.7451612903225806, "log_loss": 0.5218116044186535, "brier": 0.17413734648554866, "auc": 0.8233413269384492, "ece": 0.06988704552878557},
+      "slow_only": {"accuracy": 0.7193548387096774, "log_loss": 0.5380334500790595, "brier": 0.1803062596842798, "auc": 0.8094156268831884, "ece": 0.05694183105057535},
+      "delta_only": {"accuracy": 0.7516129032258064, "log_loss": 0.5197626995091145, "brier": 0.17307440433568524, "auc": 0.8247296899322647, "ece": 0.07185866434623062},
+      "slow_plus_delta": {"accuracy": 0.7387096774193549, "log_loss": 0.5211279022164111, "brier": 0.1738829967567379, "auc": 0.8235468292658627, "ece": 0.07503505959207685},
+      "team_opponent_delta": {"accuracy": 0.7548387096774194, "log_loss": 0.5198106798576864, "brier": 0.17308370061181465, "auc": 0.8250217882579265, "ece": 0.07185477351267486},
+      "dual_full": {"accuracy": 0.7387096774193549, "log_loss": 0.5211683749833766, "brier": 0.17389116532362044, "auc": 0.8233392649959912, "ece": 0.07504378464828662}
+    }
+  },
+  "future_holdout": {
+    "male": {
+      "fast_only": {"accuracy": 0.7339181286549707, "log_loss": 0.5637506205548606, "brier": 0.19013635900526352, "auc": 0.7841935925520264, "ece": 0.05662371774253054},
+      "delta_only": {"accuracy": 0.7309941520467836, "log_loss": 0.5567569236624539, "brier": 0.1879463309652326, "auc": 0.7896358159912377, "ece": 0.04715980637820216},
+      "slow_plus_delta": {"accuracy": 0.7309941520467836, "log_loss": 0.5599067424483948, "brier": 0.18894568371760665, "auc": 0.7869162575717014, "ece": 0.05058863825649223},
+      "team_opponent_delta": {"accuracy": 0.7309941520467836, "log_loss": 0.5568463210834895, "brier": 0.18798179615473545, "auc": 0.7895711902786576, "ece": 0.04724090582351524},
+      "dual_full": {"accuracy": 0.7309941520467836, "log_loss": 0.5600174268941474, "brier": 0.1889797915314762, "auc": 0.786828673034062, "ece": 0.05078736400875654}
+    },
+    "female": {
+      "fast_only": {"accuracy": 0.7198067632850241, "log_loss": 0.5298598943730449, "brier": 0.1787634685438838, "auc": 0.8114141602839529, "ece": 0.07004246078291007},
+      "delta_only": {"accuracy": 0.7342995169082126, "log_loss": 0.537001809190229, "brier": 0.18134005484880913, "auc": 0.8040351204931814, "ece": 0.07063170584715495},
+      "slow_plus_delta": {"accuracy": 0.7198067632850241, "log_loss": 0.5323229148342422, "brier": 0.1797172509741614, "auc": 0.8094737311462997, "ece": 0.06242170551043175},
+      "team_opponent_delta": {"accuracy": 0.7342995169082126, "log_loss": 0.5370546491794517, "brier": 0.1813592417000572, "auc": 0.8039680391950588, "ece": 0.07073812357097752},
+      "dual_full": {"accuracy": 0.7198067632850241, "log_loss": 0.5322539990847041, "brier": 0.17969936897282098, "auc": 0.8095749274035112, "ece": 0.06230567569926976}
+    }
+  },
+  "rolling_origin_test_log_loss": {
+    "male": {
+      "fast_only": [0.5870, 0.5799, 0.6015, 0.5659, 0.5352],
+      "delta_only": [0.5887, 0.5834, 0.6122, 0.5795, 0.5422],
+      "slow_plus_delta": [0.5870, 0.5796, 0.6020, 0.5670, 0.5342],
+      "dual_full": [0.5871, 0.5796, 0.6020, 0.5670, 0.5343]
+    },
+    "female": {
+      "fast_only": [0.5286, 0.5515, 0.4877, 0.4919, 0.5309],
+      "delta_only": [0.5336, 0.5506, 0.4838, 0.4910, 0.5230],
+      "slow_plus_delta": [0.5297, 0.5533, 0.4860, 0.4910, 0.5301],
+      "dual_full": [0.5297, 0.5533, 0.4861, 0.4911, 0.5302]
+    }
+  },
+  "decision": {
+    "male": "No promotion. Delta-only improves frozen test and future log loss/Brier/AUC, but loses log loss in all five rolling-origin windows versus fast-only.",
+    "female": "No promotion. Delta-only improves frozen test and three headline metrics in 4/5 rolling origins, but loses future log loss/Brier/AUC versus fast-only.",
+    "overall": "The fast-minus-slow movement signal is promising but not sufficiently reproducible across both genders and all chronological tests to replace Challenger B. Do not tune further without a new predeclared structural hypothesis."
+  }
+}
