@@ -3,6 +3,9 @@
 This runner appends bounded recent fast-Elo movement to raw Challenger B.
 Selection is validation-only. Frozen test and the final 171-match future holdout
 never choose a configuration. V0/W0 are not modified.
+
+For the rolling-origin evaluation, the configuration selected on the main
+chronological validation split is held fixed and evaluated at each origin.
 """
 from __future__ import annotations
 
@@ -162,19 +165,14 @@ def run_gender(matches: list[CanonicalMatch], gender: str) -> dict:
     n = len(matches)
     for fraction in (0.50, 0.55, 0.60, 0.65, 0.70):
         a = int(n * fraction); v = int(n * 0.10); t = int(n * 0.10)
-        local = []
-        for key, frame in built.items():
-            feats = FEATURES + [c for c in frame.columns if c.startswith("bounded_")]
-            model = fit(frame.iloc[:a], feats)
-            p = model.predict_proba(frame.iloc[a:a + v][feats])[:, 1]
-            local.append((float(log_loss(frame.target.iloc[a:a + v], p)), key))
-        local.sort(); key = local[0][1]; frame = built[key]
+        frame = built[selected]
         feats = FEATURES + [c for c in frame.columns if c.startswith("bounded_")]
         local_model = fit(frame.iloc[:a], feats)
         bounded_test = metrics(local_model, frame.iloc[a + v:a + v + t], feats)
         b_model = fit(ordered_base.iloc[:a], FEATURES)
         b_test = metrics(b_model, ordered_base.iloc[a + v:a + v + t], FEATURES)
-        rolling.append({"train_fraction": fraction, "selected": key,
+        rolling.append({"train_fraction": fraction, "selected": selected,
+                        "selection_source": "main_validation",
                         "challenger_b": b_test, "bounded": bounded_test})
 
     holdout_n = 171; holdout_val_n = 310
