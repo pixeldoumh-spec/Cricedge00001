@@ -6,6 +6,7 @@ bookmaker prices. Missing or ambiguous targets are counted explicitly.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -14,6 +15,7 @@ from typing import Any
 from app.model.data.parser import iter_matches
 
 CPL_NAMES = {"caribbean premier league", "caribbean premier league men", "cpl"}
+NON_BOWLER_WICKETS = {"run out", "retired hurt", "retired out", "obstructing the field"}
 
 
 def event_name(info: dict[str, Any]) -> str:
@@ -26,6 +28,22 @@ def event_name(info: dict[str, Any]) -> str:
 def is_cpl(info: dict[str, Any]) -> bool:
     name = event_name(info).strip().lower()
     return name in CPL_NAMES or "caribbean premier league" in name
+
+
+def match_key(info: dict[str, Any]) -> str:
+    """Stable local identity from fields that are present in Cricsheet JSON."""
+    event = info.get("event") or {}
+    match_number = event.get("match_number") if isinstance(event, dict) else None
+    raw = "|".join(
+        [
+            event_name(info),
+            str(match_number or ""),
+            ",".join(map(str, info.get("dates") or [])),
+            "|".join(sorted(map(str, info.get("teams") or []))),
+            str(info.get("venue") or ""),
+        ]
+    )
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
 
 def deliveries(match: dict[str, Any]):
@@ -58,13 +76,13 @@ def target_status(match: dict[str, Any]) -> dict[str, Any]:
     info = match.get("info") or {}
     innings = match.get("innings") or []
     totals = innings_totals(match)
+    teams = list(info.get("teams") or [])
     status: dict[str, Any] = {}
 
     outcome = info.get("outcome") or {}
     status["match_winner"] = bool(outcome.get("winner"))
     status["super_over_resolution"] = bool(
-        outcome.get("method") == "super over"
-        or len(innings) > 2
+        outcome.get("method") == "super over" or len(innings) > 2
     )
     status["player_of_match"] = bool(info.get("player_of_match"))
     status["innings_totals"] = len(totals) >= 1 and all(
@@ -79,30 +97,32 @@ def target_status(match: dict[str, Any]) -> dict[str, Any]:
     team_player_runs = defaultdict(Counter)
     team_bowler_wickets = defaultdict(Counter)
 
-    for innings_index, team, over_number, delivery in deliveries(match):
+    for innings_index, batting_team, over_number, delivery in deliveries(match):
         runs = delivery.get("runs") or {}
         batter = delivery.get("batter")
         batter_runs = int(runs.get("batter", 0))
         player_runs[batter] += batter_runs
-        team_player_runs[team][batter] += batter_runs
+        team_player_runs[batting_team][batter] += batter_runs
         if batter_runs == 4:
-            team_fours[team] += 1
+            team_fours[batting_team] += 1
         if batter_runs == 6:
-            team_sixes[team] += 1
-        over_runs[(innings_index, team, over_number)] += int(runs.get("total", 0))
+            team_sixes[batting_team] += 1
+        over_runs[(innings_index, batting_team, over_number)] += int(runs.get("total", 0))
 
+        # Wickets are credited to the bowling side, which is the opponent of
+        # the batting team. This distinction is essential for Team Top Bowler.
+        bowling_team = next((t for t in teams if t != batting_team), None)
         for wicket in delivery.get("wickets") or []:
             kind = str(wicket.get("kind") or "").lower()
-            if kind not in {"run out", "retired hurt", "retired out", "obstructing the field"}:
+            if kind not in NON_BOWLER_WICKETS:
                 bowler = delivery.get("bowler")
-                bowler_wickets[bowler] += 1
-                team_bowler_wickets[team][bowler] += 1
+                if bowler:
+                    bowler_wickets[bowler] += 1
+                    if bowling_team:
+                        team_bowler_wickets[bowling_team][bowler] += 1
 
     status["player_runs"] = bool(player_runs)
 
-    # The bookmaker's over 1-6 markets are for the first innings team. A
-    # second innings may finish before over 6 and therefore must not invalidate
-    # the first-innings over market coverage.
     first_innings = innings[0] if innings else {}
     first_team = first_innings.get("team")
     status["first_innings_over_1_to_6"] = bool(first_team) and all(
@@ -125,11 +145,11 @@ def audit(archive: Path) -> dict[str, Any]:
     competition_names = Counter()
     examples: dict[str, list[str]] = defaultdict(list)
 
-    for index, match in enumerate(iter_matches(archive)):
+    for match in iter_matches(archive):
         info = match.get("info") or {}
         if not is_cpl(info):
             continue
-        match_id = str(match.get("meta", {}).get("data_version") or f"match-{index:06d}")
+        match_id = match_key(info)
         date_values = info.get("dates") or []
         if date_values:
             dates.append(str(date_values[0]))
