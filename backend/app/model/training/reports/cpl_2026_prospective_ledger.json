@@ -1,0 +1,110 @@
+{
+  "experiment": "CPL 2026 prospective validation",
+  "status": "snapshot_frozen_before_match_16",
+  "snapshot_date": "2026-08-25",
+  "purpose": "Live-season diagnostic of the current T20 Challenger B on a franchise T20 competition. This is not a production validation or promotion test because the locked training corpus contains international T20s and no CPL matches.",
+  "model": {
+    "reference": "T20 Challenger B",
+    "selected_k": 80,
+    "estimator": "StandardScaler + LogisticRegression(max_iter=2000)",
+    "feature_contract": [
+      "team_elo",
+      "opponent_elo",
+      "elo_difference",
+      "team_form_3",
+      "team_form_5",
+      "team_form_10",
+      "venue_team_win_rate",
+      "venue_bat_first_win_rate",
+      "head_to_head_win_rate",
+      "batting_run_rate",
+      "bowling_run_rate",
+      "batting_wicket_rate",
+      "bowling_wicket_rate"
+    ],
+    "training_population": "male international T20",
+    "frozen_training_rows": 2387,
+    "frozen_validation_rows": 511,
+    "frozen_test_rows": 513,
+    "selection_policy": "K=80 was selected previously by validation log loss and is fixed for this prospective stream; no 2026 CPL result is used to select or refit the model coefficients."
+  },
+  "corpus": {
+    "file": "t20s_json.zip",
+    "sha256": "e868d332681b38df6f39376e6d7daf14143c57fc775abbf1cc830d8bb80dd997",
+    "json_files": 5640,
+    "eligible_male_international_t20": 3411,
+    "date_range_eligible": ["2005-02-17", "2026-08-21"],
+    "cpl_event_matches_in_raw_archive": 0
+  },
+  "live_state_policy": {
+    "historical_state": "The frozen Challenger B model is trained from the frozen international-T20 population. CPL franchise teams are not mapped to international teams or legacy franchise names.",
+    "cpl_initial_state": "All franchise-specific state starts cold at the canonical defaults and is updated sequentially using completed 2026 CPL results only.",
+    "ball_strength_input": "Scorecard-summary reconstruction for the live CPL matches; legal-ball counts from published overs are used because the locked corpus parser cannot ingest these web scorecards as canonical Cricsheet deliveries. This makes the snapshot a live diagnostic, not a strict canonical-run reproduction.",
+    "calibration": "none",
+    "prediction_freeze": "Prediction is immutable once recorded; later CPL results may update the state only for subsequent fixtures."
+  },
+  "data_sources": {
+    "fixtures_and_results": "https://www.windiescricket.com/fixtures/comp_id/9190/",
+    "series_results": "https://www.windiescricket.com/series/republic-bank-caribbean-premier-league-2026-22129/",
+    "cross_check_schedule": "https://cpl.com.in/schedule/"
+  },
+  "completed_matches_used_before_snapshot": 15,
+  "match_16": {
+    "fixture_date_local": "2026-08-25",
+    "fixture": "Antigua and Barbuda Falcons vs Barbados Tridents",
+    "venue": "Sir Vivian Richards Stadium, North Sound",
+    "prediction": {
+      "home_team": "Antigua and Barbuda Falcons",
+      "away_team": "Barbados Tridents",
+      "home_probability": 0.45226719187666936,
+      "away_probability": 0.5477328081233306,
+      "predicted_winner": "Barbados Tridents"
+    },
+    "pre_match_features": {
+      "team_elo": 1498.5366851997699,
+      "opponent_elo": 1575.3763164868537,
+      "elo_difference": -76.83963128708388,
+      "team_form_3": 0.6666666666666666,
+      "team_form_5": 0.4,
+      "team_form_10": 0.5,
+      "venue_team_win_rate": 0.6666666666666666,
+      "venue_bat_first_win_rate": 0.5,
+      "head_to_head_win_rate": 0.5,
+      "batting_run_rate": 8.10526315789475,
+      "bowling_run_rate": 9.710526315789446,
+      "batting_wicket_rate": 0.40350877192982454,
+      "bowling_wicket_rate": 0.42105263157894735
+    },
+    "feature_quality": "CPL-specific live state reconstructed from published scorecard summaries; not a canonical Cricsheet delivery reconstruction."
+  },
+  "remaining_group_fixtures": [
+    [16,"2026-08-25","Antigua and Barbuda Falcons","Barbados Tridents","Sir Vivian Richards Stadium"],
+    [17,"2026-08-26","Trinbago Knight Riders","Saint Lucia Kings","Brian Lara Cricket Academy"],
+    [18,"2026-08-27","St Kitts & Nevis Patriots","Jamaica Kingsmen","Warner Park"],
+    [19,"2026-08-28","Trinbago Knight Riders","Barbados Tridents","Brian Lara Cricket Academy"],
+    [20,"2026-08-29","Trinbago Knight Riders","Guyana Amazon Warriors","Brian Lara Cricket Academy"],
+    [21,"2026-08-30","St Kitts & Nevis Patriots","Antigua and Barbuda Falcons","Warner Park"],
+    [22,"2026-08-31","Trinbago Knight Riders","Jamaica Kingsmen","Brian Lara Cricket Academy"],
+    [23,"2026-09-01","St Kitts & Nevis Patriots","Barbados Tridents","Warner Park"],
+    [24,"2026-09-02","Trinbago Knight Riders","Antigua and Barbuda Falcons","Brian Lara Cricket Academy"],
+    [25,"2026-09-03","St Kitts & Nevis Patriots","Saint Lucia Kings","Warner Park"],
+    [26,"2026-09-04","Guyana Amazon Warriors","Jamaica Kingsmen","Guyana National Stadium"],
+    [27,"2026-09-05","Barbados Tridents","Trinbago Knight Riders","Kensington Oval"],
+    [28,"2026-09-06","Guyana Amazon Warriors","St Kitts & Nevis Patriots","Guyana National Stadium"],
+    [29,"2026-09-06","Barbados Tridents","Saint Lucia Kings","Kensington Oval"],
+    [30,"2026-09-08","Guyana Amazon Warriors","Antigua and Barbuda Falcons","Guyana National Stadium"],
+    [31,"2026-09-09","Guyana Amazon Warriors","Saint Lucia Kings","Guyana National Stadium"],
+    [32,"2026-09-10","Barbados Tridents","St Kitts & Nevis Patriots","Kensington Oval"],
+    [33,"2026-09-11","Guyana Amazon Warriors","Trinbago Knight Riders","Guyana National Stadium"],
+    [34,"2026-09-12","Barbados Tridents","Jamaica Kingsmen","Kensington Oval"],
+    [35,"2026-09-13","Barbados Tridents","Guyana Amazon Warriors","Kensington Oval"]
+  ],
+  "provenance": {
+    "repository_commit": "73d5316a196cd46d03de9a79adf7cc734b415707",
+    "challenger_b_source": "backend/app/model/training/challenger_b.py",
+    "runner_source": "backend/app/model/training/run_challenger_b.py",
+    "training_contract": "K=80; frozen male 2387/511/513 chronological split; 13-feature logistic model",
+    "prediction_note": "The numerical Match 16 probability was reproduced locally from the current Challenger B contract using the locked corpus and a sequential CPL scorecard-summary state adapter. It must not be interpreted as a canonical Cricsheet reproduction until the 2026 CPL inputs are available in canonical delivery form."
+  },
+  "promotion_policy": "No promotion decision is permitted from this live-season stream. It is a prospective diagnostic only."
+}
