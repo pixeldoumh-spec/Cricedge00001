@@ -1,0 +1,17 @@
+{
+  "dataset": "cpl_historical_recovery",
+  "status": "awaiting_exact_archive",
+  "rows": [],
+  "schema": {
+    "match_key": "stable source match identifier or date+teams+venue fallback",
+    "date": "YYYY-MM-DD",
+    "teams": ["team_a", "team_b"],
+    "field": "target field being recovered",
+    "value": "recovered value",
+    "source_url": "authoritative scorecard/source URL",
+    "retrieved_at": "ISO-8601",
+    "source_type": "scorecard|official|secondary",
+    "confidence": "verified|corroborated|unresolved",
+    "notes": "why this value is accepted or rejected"
+  }
+}
