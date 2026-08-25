@@ -1,0 +1,38 @@
+{
+  "experiment": "T20 bounded recency movement extension",
+  "status": "completed_diagnostic_rejected",
+  "date": "2026-08-25",
+  "corpus_sha256": "e868d332681b38df6f39376e6d7daf14143c57fc775abbf1cc830d8bb80dd997",
+  "corpus_counts": {"male": 3411, "female": 2066},
+  "split": {"male": [2387, 511, 513], "female": [1446, 310, 310]},
+  "definition": {
+    "fast_k": {"male": 80, "female": 160},
+    "rate": "(fast_elo_before_t-fast_elo_after_Hth_previous_completed_team_match)/H",
+    "bounded": "tanh(rate/cap_elo)",
+    "relative": "team_rate-opponent_rate, bounded independently",
+    "magnitude": "abs(bounded signed component)",
+    "cold_start": 0.0
+  },
+  "configs": [[5,100,false],[10,100,false],[20,100,false],[10,150,false],[20,150,false],[10,100,true],[20,100,true]],
+  "selected": {"male": [20,100,true], "female": [20,100,true]},
+  "frozen_test": {
+    "male": {
+      "challenger_b_raw": {"accuracy": 0.7173489278752436, "log_loss": 0.561039522904864, "brier": 0.1897584391261568, "auc": 0.7917946067552366, "ece": 0.05979961220227563},
+      "bounded_selected": {"accuracy": 0.7173489278752436, "log_loss": 0.5634093219850914, "brier": 0.1902898417708734, "auc": 0.7902289240871918, "ece": 0.05373180051393887}
+    },
+    "female": {
+      "challenger_b_raw": {"accuracy": 0.7451612903225806, "log_loss": 0.5218116044186533, "brier": 0.17413734648554866, "auc": 0.8233413269384492, "ece": 0.06988704552878558},
+      "bounded_selected": {"accuracy": 0.7354838709677419, "log_loss": 0.5312111143025003, "brier": 0.17814552946681195, "auc": 0.8222053935798729, "ece": 0.08706345861300474}
+    }
+  },
+  "rolling_logloss": {
+    "male": [[0.5,[20,100,true],0.5870200540694585,0.5889125895126708],[0.55,[20,100,true],0.5798638800666696,0.5757343520440524],[0.6,[10,100,true],0.6015209918823188,0.6007863942603143],[0.65,[20,100,true],0.5659189630728662,0.5621343654958445],[0.7,[20,100,true],0.535230651389627,0.5427529357019242]],
+    "female": [[0.5,[10,150,false],0.5293533469984978,0.5250704974076018],[0.55,[10,100,false],0.5500591620333035,0.5530598249728063],[0.6,[10,150,false],0.4883497466277436,0.48937778252408404],[0.65,[20,100,true],0.4954621105477562,0.494635174434493],[0.7,[20,100,true],0.5325760511409716,0.554227531599122]]
+  },
+  "future_holdout_171": {
+    "male": {"challenger_b_raw": {"accuracy": 0.7543859649122807, "log_loss": 0.5550918127038161, "brier": 0.1847180469095772, "auc": 0.795423403672239, "ece": 0.09995125817309877}, "bounded_selected": {"accuracy": 0.7543859649122807, "log_loss": 0.5468698750603198, "brier": 0.18009158229036515, "auc": 0.8113181693614688, "ece": 0.1187666106059061}},
+    "female": {"challenger_b_raw": {"accuracy": 0.7719298245614035, "log_loss": 0.5015058212113207, "brier": 0.1657216247232675, "auc": 0.8399014778325123, "ece": 0.07739554112922518}, "bounded_selected": {"accuracy": 0.7602338709677419, "log_loss": 0.4948952712279342, "brier": 0.16407696190250415, "auc": 0.8416803503010398, "ece": 0.11275957870443279}}
+  },
+  "decision": "REJECT: bounded recency is not a replacement for raw Challenger B. It improves some rolling windows and the latest future holdout, but fails the frozen-test predictive gate for both genders and materially worsens calibration for the future holdout.",
+  "provenance": {"bounded_definition_commit": "926db5c0b4f6dbf10edcd12110ca1493b5c53957", "challenger_b_commit": "3d58c5c1af22fbee5b33509e881a838829e3e49d", "reference_runner_commit": "b414c75fa65846d0e714e11e8dc031ffd135d52c"}
+}
