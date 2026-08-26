@@ -1,0 +1,32 @@
+{
+  "dataset_id": "cpl_historical_ball_by_ball",
+  "status": "source_verified_pending_local_freeze",
+  "historical_source": {
+    "provider": "Cricsheet",
+    "format": "JSON",
+    "competition": "Caribbean Premier League",
+    "gender": "male",
+    "first_available_season": 2013,
+    "source_page": "https://cricsheet.org/downloads/",
+    "coverage_page": "https://cricsheet.org/coverage/",
+    "missing_page": "https://cricsheet.org/missing/",
+    "observed_download_page_count": 407,
+    "observed_coverage_page_count": 419,
+    "observed_coverage_checked": 428,
+    "coverage_note": "Cricsheet pages can update independently; freeze the exact downloaded archive before training."
+  },
+  "local_freeze": {
+    "archive_filename": null,
+    "sha256": null,
+    "retrieved_at": null,
+    "match_count": null,
+    "earliest_date": null,
+    "latest_date": null
+  },
+  "training_policy": {
+    "historical_cpl_only_for_cpl_specific_adaptation": true,
+    "2026_prospective_results_excluded_from_training_while_evaluation_open": true,
+    "bookmaker_odds_excluded_from_training": true,
+    "coin_toss_targets_excluded": true
+  }
+}

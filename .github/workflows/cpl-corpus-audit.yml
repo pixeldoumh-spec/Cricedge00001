@@ -1,0 +1,44 @@
+name: CPL Corpus Audit
+
+on:
+  push:
+    branches: [research/cpl-outcome-engine]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download exact CPL JSON source
+        run: curl -L --fail --retry 3 -o cpl_json.zip https://cricsheet.org/downloads/cpl_json.zip
+
+      - name: Freeze source hash
+        run: sha256sum cpl_json.zip | tee cpl_json.sha256
+
+      - name: Run target coverage audit
+        env:
+          PYTHONPATH: backend
+        run: python -m app.model.cpl.audit_cpl_market_coverage --archive cpl_json.zip --output cpl_market_coverage.json
+
+      - name: Build target corpus
+        run: python backend/app/model/cpl/corpus_builder.py --archive cpl_json.zip --output cpl_outcome_labels_v0_2.json
+
+      - name: Upload audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpl-corpus-audit
+          path: |
+            cpl_json.sha256
+            cpl_market_coverage.json
+            cpl_outcome_labels_v0_2.json
+          retention-days: 30
