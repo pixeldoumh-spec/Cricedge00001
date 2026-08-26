@@ -3,6 +3,8 @@ name: CPL Corpus Audit
 on:
   push:
     branches: [research/cpl-outcome-engine]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -29,7 +31,7 @@ jobs:
         run: python -m app.model.cpl.audit_cpl_market_coverage --archive cpl_json.zip --output cpl_market_coverage.json
 
       - name: Build target corpus
-        run: python backend/app/model/cpl/corpus_builder.py --archive cpl_json.zip --output cpl_outcome_labels_v0_1.json
+        run: python backend/app/model/cpl/corpus_builder.py --archive cpl_json.zip --output cpl_outcome_labels_v0_2.json
 
       - name: Upload audit artifacts
         uses: actions/upload-artifact@v4
@@ -38,5 +40,5 @@ jobs:
           path: |
             cpl_json.sha256
             cpl_market_coverage.json
-            cpl_outcome_labels_v0_1.json
+            cpl_outcome_labels_v0_2.json
           retention-days: 30
